@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ReservaRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ReservaRepository::class)
@@ -19,6 +20,7 @@ class Reserva
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank(message="La fecha no puede estar en blanco.")
      */
     private $cancha_id;
 
@@ -56,6 +58,18 @@ class Reserva
      * @ORM\Column(type="integer", nullable=true)
      */
     private $idTipoClase;
+
+    public function __construct($fecha, $hora_ini, $hora_fin, $persona_id, $cancha_id, $idTipoClase, $replica, $estado_id)
+    {
+        $this->setFecha($fecha);
+        $this->setHoraIni($hora_ini);
+        $this->setHoraFin($hora_fin);
+        $this->setPersonaId($persona_id);
+        $this->setCanchaId($cancha_id);
+        $this->setIdTipoClase($idTipoClase);
+        $this->setReplica($replica);
+        $this->setEstadoId($estado_id);
+    }
 
     public function getId(): ?int
     {

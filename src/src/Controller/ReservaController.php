@@ -2,18 +2,21 @@
 
 namespace App\Controller;
 
-use App\Entity\Alquiler;
-use App\Entity\Cancha;
+use DateTime;
+use DateInterval;
 use App\Entity\Grupo;
+use App\Entity\Cancha;
 use App\Entity\Persona;
 use App\Entity\Reserva;
-use App\Service\CustomService as ServiceCustomService;
-use DateTime;
+use App\Entity\Alquiler;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\CustomService as ServiceCustomService;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route(path="/api")
@@ -111,23 +114,22 @@ class ReservaController extends AbstractController
         Request $request,
         ManagerRegistry $doctrine,
         ServiceCustomService $cs
-
     ): Response {
 
         $parametros = $request->request->all();
 
 
         $clienteParam = array(
-            "nombre"    => isset($parametros['nombre']) ? $parametros['nombre']: null,
-            "telefono"    => isset($parametros['telefono']) ? $parametros['telefono']: null,
+            "nombre"    => isset($parametros['nombre']) ? $parametros['nombre'] : null,
+            "telefono"    => isset($parametros['telefono']) ? $parametros['telefono'] : null,
         );
 
         $persona_id = null;
         if (isset($parametros['persona_id'])) {
-            if ( (int) $parametros['persona_id'] > 0){
+            if ((int) $parametros['persona_id'] > 0) {
                 $persona_id = (int) $parametros['persona_id'];
             }
-        } 
+        }
 
         $reservaParam = array(
             "cancha_id"     =>  $parametros['cancha_id'],
@@ -135,49 +137,45 @@ class ReservaController extends AbstractController
             "hora_ini"      =>  new DateTime($parametros['hora_ini']),
             "hora_fin"      =>  new DateTime($parametros['hora_fin']),
             "persona_id"    =>  $persona_id,
-            "replica"       =>  (isset($parametros['replica']) && $parametros['replica'] == 'true')? true:false,
+            "replica"       => (isset($parametros['replica']) && $parametros['replica'] == 'true') ? true : false,
             "estado_id"     =>  0,
-            "grupo"         => isset($parametros['grupo_ids'])? $parametros['grupo_ids']:null,
+            "grupo"         => isset($parametros['grupo_ids']) ? $parametros['grupo_ids'] : null,
             "tipo"          =>  $parametros['tipo'],
         );
 
-
-
         $em = $doctrine->getManager();
 
-        $reserva = new Reserva();
-
-        $reserva->setCanchaId($reservaParam['cancha_id']);
-        $reserva->setFecha($reservaParam['fecha']);
-        $reserva->setHoraIni($reservaParam['hora_ini']);
-        $reserva->setHoraFin($reservaParam['hora_fin']);
-        $reserva->setPersonaId($reservaParam['persona_id']);
-        $reserva->setReplica($reservaParam['replica']);
-        $reserva->setEstadoId($reservaParam['estado_id']);
-        $reserva->setIdTipoClase($reservaParam['tipo']);
-        
+        $reserva = new Reserva(
+            $reservaParam['fecha'],
+            $reservaParam['hora_ini'],
+            $reservaParam['hora_fin'],
+            $reservaParam['persona_id'],
+            $reservaParam['cancha_id'],
+            $reservaParam['tipo'],
+            $reservaParam['replica'],
+            $reservaParam['estado_id']
+        );
 
         $reservaId =  $em->persist($reserva);
-        
+
 
         $lastReservaId = (int) $cs->getLastReservaId();
         $idReserva = $lastReservaId + 1;
 
         $procesarReplicas = false;
 
-        if ($reservaParam['persona_id'] != null){
-            $ids_grupo = explode(',',$reservaParam['grupo']);
-            foreach($ids_grupo as $alumno_id){
-                if (is_numeric($alumno_id)){
+        if ($reservaParam['persona_id'] != null) {
+            $ids_grupo = explode(',', $reservaParam['grupo']);
+            foreach ($ids_grupo as $alumno_id) {
+                if (is_numeric($alumno_id)) {
                     $grupo_alumno = new Grupo();
                     $grupo_alumno->setReservaId($idReserva);
                     $grupo_alumno->setPersonaId($alumno_id);
                     $em->persist($grupo_alumno);
                 }
             }
-            
-            if ($reservaParam['replica']) $procesarReplicas = true;
 
+            if ($reservaParam['replica']) $procesarReplicas = true;
         } else {
             $alquiler = new Alquiler();
             $alquiler->setNombre($clienteParam['nombre']);
@@ -201,11 +199,128 @@ class ReservaController extends AbstractController
         return $this->json($resp);
     }
 
+    /**
+     * @Route("/profesor-reserva", name="app_alta_profesor_reserva", methods={"POST"})
+     */
+    public function storeProfesorReserva(Request $request, ManagerRegistry $doctrine, ServiceCustomService $cs, ValidatorInterface $validator): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $em = $doctrine->getManager();
+
+        $fechaInicio = new DateTime($data['fecha_ini']);
+        $fechaFin = new DateTime($data['fecha_fin']);
+        $horaIni = new DateTime($data['hora_ini']);
+        $horaFin = new DateTime($data['hora_fin']);
+        $alumnos = $data['alumnos'];
+
+        if ($fechaFin > $fechaInicio) {
+            $fechas_ocupadas = [];
+
+            // Funcion para filtrar antes de reservar
+            /* $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdBetweenDatesAndTime($data['cancha_id'], $fechaInicio, $fechaFin, $horaIni, $horaFin); */
+
+            while ($fechaInicio <= $fechaFin) {
+                $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdAndDateAndTime($data['cancha_id'], $fechaInicio, $horaIni, $horaFin);
+
+                if ($reservas == null) {
+                    // Clase grupal
+                    $reserva = new Reserva(
+                        $fechaInicio,
+                        $horaIni,
+                        $horaFin,
+                        1, // TODO: cambiar por el usuario autenticado del momento (Profesor)
+                        $data['cancha_id'],
+                        2, // tipo_clase_id (Siempre en grupo)
+                        0, // replica
+                        1 // estado
+                    );
+                    $reservaId =  $em->persist($reserva);
+                    $em->flush();
+                } else {
+                    array_push($fechas_ocupadas, $fechaInicio->format('Y-m-d'));
+                }
+
+                $this->add_people_to_group($alumnos, $em, $cs);
+                if ($data['repite'] == 'Todas las semanas') {
+                    $fechaInicio->add(new DateInterval('P1W'));
+                } elseif ($data['repite'] == 'Todos los meses') {
+                    $fechaInicio->add(new DateInterval('P1M'));
+                } else {
+                    $fechaInicio->add(new DateInterval('P1D'));
+                }
+            }
+
+            if ($fechas_ocupadas != null) {
+                return new JsonResponse(['error' => 'Fechas y Horarios no disponibles', 'fechas_ocupadas' => $fechas_ocupadas, 'message' => 'Se reservaran únicamente las fechas disponibles, en el horario indicado'], 409);
+            }
+        } else {
+            $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdAndDateAndTime($data['cancha_id'], $fechaInicio, $horaIni, $horaFin);
+
+            if ($reservas == null) {
+                $reserva = new Reserva(
+                    $fechaInicio,
+                    $horaIni,
+                    $horaFin,
+                    1, // TODO: cambiar por el usuario autenticado del momento (Profesor)
+                    $data['cancha_id'],
+                    2, // tipo_clase_id (Siempre en grupo)
+                    0, // replica
+                    1 // estado
+                );
+
+                $em->persist($reserva);
+                $em->flush();
+
+                $this->add_people_to_group($alumnos, $em, $cs);
+            } else {
+                return new JsonResponse(['error' => 'Horario no disponible', 'message' => 'El horario seleccionado ya ha sido reservado. Por favor, elige otro horario.'], 409);
+            }
+        }
+
+        return new JsonResponse(['data' => $data, 'message' => 'Creado con éxito'], 201);
+    }
+
+    public function add_people_to_group($alumnos, $em, $cs)
+    {
+        $lastReservaId = (int) $cs->getLastReservaId();
+
+        foreach ($alumnos as $alumno_id) {
+            $grupo_alumno = new Grupo();
+            $grupo_alumno->setReservaId($lastReservaId);
+            $grupo_alumno->setPersonaId($alumno_id);
+            $em->persist($grupo_alumno);
+        }
+        $em->flush();
+    }
+
+    /**
+     * @Route("/mis-reservas", name="app_mis_reservas", methods={"GET"})
+     */
+    public function profesorReservas(ServiceCustomService $cs): Response
+    {
+        $profesorId = 1; // TODO: Cambiar por el usuario autenticado del momento
+
+        $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasProfesor($profesorId);
+
+        $rtaReservas =  array();
+        foreach ($reservas as $reserva) {
+            $reservaRta = $cs->reservaFromObject($reserva);
+            array_push($rtaReservas, $reservaRta);
+        }
+
+        if ($rtaReservas == null) {
+            return new JsonResponse(['data' => $rtaReservas, 'message' => 'No se encontraron resultados que coincidan con los criterios de búsqueda.'], 200);
+        } else {
+            return new JsonResponse(['data' => $rtaReservas, 'message' => 'Ok'], 200);
+        }
+    }
+
 
     /**
      * @Route("/profe_reserva", name="mod_profe_reserva", methods={"PUT"})
      */
-    public function modProfeReserva(Request $request, ManagerRegistry $doctrine ): Response
+    public function modProfeReserva(Request $request, ManagerRegistry $doctrine): Response
     {
         $reservaId = $request->request->get('reserva_id');
         $personaId = $request->request->get('persona_id');
@@ -223,29 +338,28 @@ class ReservaController extends AbstractController
 
 
         return $this->json($resp);
-
     }
 
-        /**
+    /**
      * @Route("/grupo_reserva", name="mod_grupo_reserva", methods={"PUT"})
      */
-    public function modGrupoReserva(Request $request, ManagerRegistry $doctrine ): Response
+    public function modGrupoReserva(Request $request, ManagerRegistry $doctrine): Response
     {
         $reservaId = $request->request->get('reserva_id');
         $grupoIds  = $request->request->get('grupo_ids');
 
-        $ids_grupo = explode(',',$grupoIds);
+        $ids_grupo = explode(',', $grupoIds);
 
         $em = $doctrine->getManager();
 
         $grupoViejo = $em->getRepository(Grupo::class)->findPersonasGrupoIdByReservaId($reservaId);
         // dd($grupoViejo, $ids_grupo);
-        foreach($grupoViejo as $personaGrupoViejo){
+        foreach ($grupoViejo as $personaGrupoViejo) {
             $em->getRepository(Grupo::class)->remove($personaGrupoViejo);
         }
 
-        foreach($ids_grupo as $alumno_id){
-            if (is_numeric($alumno_id)){
+        foreach ($ids_grupo as $alumno_id) {
+            if (is_numeric($alumno_id)) {
                 $grupo_alumno = new Grupo();
                 $grupo_alumno->setReservaId($reservaId);
                 $grupo_alumno->setPersonaId($alumno_id);
@@ -263,30 +377,29 @@ class ReservaController extends AbstractController
 
 
         return $this->json($resp);
-
     }
 
-      /**
+    /**
      * @Route("/clase_reserva", name="mod_clase_reserva", methods={"PUT"})
      */
-    public function modClaseReserva(Request $request, ManagerRegistry $doctrine ): Response
+    public function modClaseReserva(Request $request, ManagerRegistry $doctrine): Response
     {
         $reservaId = $request->request->get('reserva_id');
         $profesorId  = $request->request->get('persona_id');
         $grupoIds  = $request->request->get('grupo_ids');
 
-        $ids_grupo = explode(',',$grupoIds);
+        $ids_grupo = explode(',', $grupoIds);
 
         $em = $doctrine->getManager();
-        
+
         $grupoViejo = $em->getRepository(Grupo::class)->findPersonasGrupoIdByReservaId($reservaId);
         // dd($grupoViejo, $ids_grupo);
-        foreach($grupoViejo as $personaGrupoViejo){
+        foreach ($grupoViejo as $personaGrupoViejo) {
             $em->getRepository(Grupo::class)->remove($personaGrupoViejo);
         }
 
-        foreach($ids_grupo as $alumno_id){
-            if (is_numeric($alumno_id)){
+        foreach ($ids_grupo as $alumno_id) {
+            if (is_numeric($alumno_id)) {
                 $grupo_alumno = new Grupo();
                 $grupo_alumno->setReservaId($reservaId);
                 $grupo_alumno->setPersonaId($alumno_id);
@@ -297,7 +410,7 @@ class ReservaController extends AbstractController
         $reserva = $em->getRepository(Reserva::class)->findOneById($reservaId);
         $reserva->setPersonaId($profesorId);
 
-        if ($request->get('fecha')!=null){
+        if ($request->get('fecha') != null) {
             $reserva->setFecha(new DateTime($request->get('fecha')));
             $reserva->setHoraIni(new DateTime($request->get('hora_ini')));
             $reserva->setHoraFin(new DateTime($request->get('hora_fin')));
@@ -312,7 +425,6 @@ class ReservaController extends AbstractController
 
 
         return $this->json($resp);
-
     }
 
 
@@ -351,8 +463,6 @@ class ReservaController extends AbstractController
 
         return $this->json(array());
     }
-
-
 }
 // TODO: hacer metodo que replique reservas desde la fecha guardada en usuarios hasta ayer
 // analogo a la liquidacion de reservas
