@@ -459,7 +459,7 @@ class __TwigTemplate_b602c41afcf6ef8f70c4e7d4d024b5f16707c93fd57e8b7b9cb0528a228
             $__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02->enter($__internal_319393461309892924ff6e74d6d6e64287df64b63545b994e100d4ab223aed02_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "macro", "dump_request_data"));
 
             // line 156
-            $macros["__internal_parse_1"] = $this;
+            $macros["__internal_parse_0"] = $this;
             // line 157
             echo "{
     id: \"";
@@ -476,7 +476,7 @@ class __TwigTemplate_b602c41afcf6ef8f70c4e7d4d024b5f16707c93fd57e8b7b9cb0528a228
             echo "\",
     events: [ ";
             // line 161
-            echo twig_call_macro($macros["__internal_parse_1"], "macro_dump_events", [(isset($context["events"]) || array_key_exists("events", $context) ? $context["events"] : (function () { throw new RuntimeError('Variable "events" does not exist.', 161, $this->source); })())], 161, $context, $this->getSourceContext());
+            echo twig_call_macro($macros["__internal_parse_0"], "macro_dump_events", [(isset($context["events"]) || array_key_exists("events", $context) ? $context["events"] : (function () { throw new RuntimeError('Variable "events" does not exist.', 161, $this->source); })())], 161, $context, $this->getSourceContext());
             echo " ],
 }
 ";

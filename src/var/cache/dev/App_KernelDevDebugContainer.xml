@@ -374,6 +374,13 @@
         <argument type="service" id=".service_locator.GNc8e5B.App\Controller\PersonaController"/>
       </call>
     </service>
+    <service id="App\Controller\ProfesorController" class="App\Controller\ProfesorController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.GNc8e5B.App\Controller\ProfesorController"/>
+      </call>
+    </service>
     <service id="App\Controller\ReservaController" class="App\Controller\ReservaController" public="true" autowire="true" autoconfigure="true">
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
@@ -417,6 +424,10 @@
       <argument type="service" id="doctrine"/>
     </service>
     <service id="App\Repository\PersonaRepository" class="App\Repository\PersonaRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\ProfesorRepository" class="App\Repository\ProfesorRepository" autowire="true" autoconfigure="true">
       <tag name="doctrine.repository_service"/>
       <argument type="service" id="doctrine"/>
     </service>
@@ -4242,7 +4253,7 @@
       <factory class="Doctrine\ORM\EntityManager" method="create"/>
     </service>
     <service id="doctrine.orm.container_repository_factory" class="Doctrine\Bundle\DoctrineBundle\Repository\ContainerRepositoryFactory">
-      <argument type="service" id=".service_locator.AlmDkfl"/>
+      <argument type="service" id=".service_locator.mze3GHn"/>
     </service>
     <service id="doctrine.orm.manager_configurator.abstract" class="Doctrine\Bundle\DoctrineBundle\ManagerConfigurator" abstract="true">
       <argument type="collection"/>
@@ -6214,6 +6225,9 @@
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\PersonaController" class="App\Controller\PersonaController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\PersonaController" class="App\Controller\PersonaController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\PersonaController" class="App\Controller\PersonaController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\ProfesorController" class="App\Controller\ProfesorController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\ProfesorController" class="App\Controller\ProfesorController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\ProfesorController" class="App\Controller\ProfesorController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\ReservaController" class="App\Controller\ReservaController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\ReservaController" class="App\Controller\ReservaController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\ReservaController" class="App\Controller\ReservaController" autowire="true" autoconfigure="true" abstract="true"/>
@@ -6236,6 +6250,8 @@
     <service id=".abstract.instanceof.App\Repository\PagosRepository" class="App\Repository\PagosRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\PersonaRepository" class="App\Repository\PersonaRepository" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Repository\PersonaRepository" class="App\Repository\PersonaRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\ProfesorRepository" class="App\Repository\ProfesorRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\ProfesorRepository" class="App\Repository\ProfesorRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\PruebaRepository" class="App\Repository\PruebaRepository" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Repository\PruebaRepository" class="App\Repository\PruebaRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\ReplicasRepository" class="App\Repository\ReplicasRepository" autowire="true" abstract="true"/>
@@ -6591,7 +6607,14 @@
         <argument key="cs" type="service_closure" id="App\Service\CustomService"/>
       </argument>
     </service>
-    <service id=".service_locator..a5blCi" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.ju8mKQU" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="doctrine" type="service_closure" id="doctrine"/>
+        <argument key="entityManager" type="service_closure" id="doctrine.orm.default_entity_manager"/>
+      </argument>
+    </service>
+    <service id=".service_locator.3moxMcA" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Controller\CanchaController::addCancha" type="service_closure" id=".service_locator.T7xmfzk"/>
@@ -6603,6 +6626,8 @@
         <argument key="App\Controller\PersonaController::getAlumnos" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\PersonaController::getPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\PersonaController::modPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
+        <argument key="App\Controller\ProfesorController::addProfesor" type="service_closure" id=".service_locator.ju8mKQU"/>
+        <argument key="App\Controller\ProfesorController::getProfesor" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\ReservaController::getReservas" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController::getReservasPorCanchasPorFecha" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController::getReservasTest" type="service_closure" id=".service_locator.T_NOTpo"/>
@@ -6627,6 +6652,8 @@
         <argument key="App\Controller\PersonaController:getAlumnos" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\PersonaController:getPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\PersonaController:modPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
+        <argument key="App\Controller\ProfesorController:addProfesor" type="service_closure" id=".service_locator.ju8mKQU"/>
+        <argument key="App\Controller\ProfesorController:getProfesor" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\ReservaController:getReservas" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController:getReservasPorCanchasPorFecha" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController:getReservasTest" type="service_closure" id=".service_locator.T_NOTpo"/>
@@ -6788,7 +6815,7 @@
         <argument key="doctrine.orm.messenger.doctrine_schema_subscriber" type="service_closure" id="doctrine.orm.messenger.doctrine_schema_subscriber"/>
       </argument>
     </service>
-    <service id=".service_locator.AlmDkfl" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.mze3GHn" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Repository\AlquilerRepository" type="service_closure" id="App\Repository\AlquilerRepository"/>
@@ -6799,6 +6826,7 @@
         <argument key="App\Repository\GrupoRepository" type="service_closure" id="App\Repository\GrupoRepository"/>
         <argument key="App\Repository\PagosRepository" type="service_closure" id="App\Repository\PagosRepository"/>
         <argument key="App\Repository\PersonaRepository" type="service_closure" id="App\Repository\PersonaRepository"/>
+        <argument key="App\Repository\ProfesorRepository" type="service_closure" id="App\Repository\ProfesorRepository"/>
         <argument key="App\Repository\PruebaRepository" type="service_closure" id="App\Repository\PruebaRepository"/>
         <argument key="App\Repository\ReplicasRepository" type="service_closure" id="App\Repository\ReplicasRepository"/>
         <argument key="App\Repository\ReservaRepository" type="service_closure" id="App\Repository\ReservaRepository"/>
@@ -7107,6 +7135,12 @@
       <argument type="service" id="service_container"/>
       <factory service=".service_locator.GNc8e5B" method="withContext"/>
     </service>
+    <service id=".service_locator.GNc8e5B.App\Controller\ProfesorController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\ProfesorController"/>
+      <argument>App\Controller\ProfesorController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.GNc8e5B" method="withContext"/>
+    </service>
     <service id=".service_locator.GNc8e5B.App\Controller\ReservaController" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator_context" id="App\Controller\ReservaController"/>
       <argument>App\Controller\ReservaController</argument>
@@ -7293,12 +7327,12 @@
       <argument type="service" id="security.token_storage"/>
     </service>
     <service id="debug.argument_resolver.service.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">
-      <argument type="service" id=".service_locator..a5blCi"/>
+      <argument type="service" id=".service_locator.3moxMcA"/>
     </service>
     <service id="debug.argument_resolver.default.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver"/>
     <service id="debug.argument_resolver.variadic.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver"/>
     <service id="debug.argument_resolver.not_tagged_controller.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver">
-      <argument type="service" id=".service_locator..a5blCi"/>
+      <argument type="service" id=".service_locator.3moxMcA"/>
     </service>
     <service id="debug.traced.messenger.bus.default.inner" class="Symfony\Component\Messenger\MessageBus">
       <argument type="iterator">
@@ -8263,7 +8297,7 @@
     <service id="sensio_framework_extra.security.expression_language" alias="sensio_framework_extra.security.expression_language.default"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.gSv9zYw" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator..a5blCi"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.3moxMcA"/>
     <service id="session" alias=".session.do-not-use" public="true">
       <deprecated package="symfony/framework-bundle" version="5.3">The "%alias_id%" service and "SessionInterface" alias are deprecated, use "$requestStack-&gt;getSession()" instead.</deprecated>
     </service>
@@ -8288,7 +8322,7 @@
     <service id=".service_locator.h8Jkkd2" alias="messenger.retry_strategy_locator"/>
     <service id=".service_locator.0GV1BZZ" alias=".service_locator.gSv9zYw"/>
     <service id=".service_locator.R001GYk" alias=".service_locator.wyNId4a"/>
-    <service id=".service_locator.Dk9Spex" alias=".service_locator..a5blCi"/>
+    <service id=".service_locator.2RyoJsL" alias=".service_locator.3moxMcA"/>
     <service id=".service_locator.wKF4yn1" alias=".service_locator.19_mNxd"/>
     <service id=".service_locator.Za9MpXe" alias=".service_locator.y4dplYt"/>
     <service id=".service_locator.nk0lT0X" alias=".service_locator.1kmbKC8"/>
@@ -8320,6 +8354,7 @@
     <service id=".service_locator.T8.TLJR" alias=".service_locator.T7xmfzk"/>
     <service id=".service_locator.nErTwCG" alias=".service_locator.wyNId4a"/>
     <service id=".service_locator.m5XURC_" alias=".service_locator.T_NOTpo"/>
+    <service id=".service_locator.dNJiejL" alias=".service_locator.ju8mKQU"/>
     <service id=".service_locator.Wd_D6Iy" alias=".service_locator.GNc8e5B"/>
     <service id=".service_locator.L0rFhJm" alias=".service_locator.GVyCdgr"/>
     <service id=".service_locator.9YCWxeJ" alias=".service_locator.dw8O4oN"/>
