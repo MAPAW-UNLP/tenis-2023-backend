@@ -58,6 +58,7 @@ class ProfesorController extends AbstractController
         $profesor->setEmail($email);
         // AGREGAR CONTRASEÑA CON JWT O SECURITY DE SYMFONY
         // $usuario->setPassword('');
+        $usuario->setUsername($profesor->getEmail());
 
         $profesor->setUsuario($usuario);
 

@@ -32,9 +32,10 @@ class Profesor
      */
     private $telefono;
     /**
-     * @ORM\OneToOne(targetEntity="Usuario", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="Usuario", cascade={"persist"}, inversedBy="profesor")
      * @ORM\JoinColumn(name="id", referencedColumnName="id")
      */
+
     private $usuario;
 
 

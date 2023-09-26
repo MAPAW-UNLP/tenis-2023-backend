@@ -11,6 +11,9 @@ return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\
             'targetEntity' => [
                 'Usuario',
             ],
+            'inversedBy' => [
+                'profesor',
+            ],
             'cascade' => [
                 [
                     'persist',
