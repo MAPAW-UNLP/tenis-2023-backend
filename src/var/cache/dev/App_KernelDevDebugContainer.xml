@@ -377,6 +377,7 @@
     <service id="App\Controller\ProfesorController" class="App\Controller\ProfesorController" public="true" autowire="true" autoconfigure="true">
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
+      <argument type="service" id="App\Service\CorreoService"/>
       <call method="setContainer">
         <argument type="service" id=".service_locator.GNc8e5B.App\Controller\ProfesorController"/>
       </call>
@@ -446,6 +447,9 @@
     <service id="App\Repository\UsuarioRepository" class="App\Repository\UsuarioRepository" autowire="true" autoconfigure="true">
       <tag name="doctrine.repository_service"/>
       <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Service\CorreoService" class="App\Service\CorreoService" autowire="true" autoconfigure="true">
+      <argument type="service" id="mailer.mailer"/>
     </service>
     <service id="App\Service\CustomService" class="App\Service\CustomService" autowire="true" autoconfigure="true">
       <argument type="service" id="doctrine"/>
@@ -6607,14 +6611,15 @@
         <argument key="cs" type="service_closure" id="App\Service\CustomService"/>
       </argument>
     </service>
-    <service id=".service_locator.ju8mKQU" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.CGOCeSe" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="doctrine" type="service_closure" id="doctrine"/>
         <argument key="entityManager" type="service_closure" id="doctrine.orm.default_entity_manager"/>
+        <argument key="passwordEncoder" type="service_closure" id="security.user_password_encoder.generic"/>
       </argument>
     </service>
-    <service id=".service_locator.3moxMcA" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.c_vn232" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Controller\CanchaController::addCancha" type="service_closure" id=".service_locator.T7xmfzk"/>
@@ -6626,7 +6631,7 @@
         <argument key="App\Controller\PersonaController::getAlumnos" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\PersonaController::getPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\PersonaController::modPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
-        <argument key="App\Controller\ProfesorController::addProfesor" type="service_closure" id=".service_locator.ju8mKQU"/>
+        <argument key="App\Controller\ProfesorController::addProfesor" type="service_closure" id=".service_locator.CGOCeSe"/>
         <argument key="App\Controller\ProfesorController::getProfesor" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\ReservaController::getReservas" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController::getReservasPorCanchasPorFecha" type="service_closure" id=".service_locator.T_NOTpo"/>
@@ -6652,7 +6657,7 @@
         <argument key="App\Controller\PersonaController:getAlumnos" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\PersonaController:getPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\PersonaController:modPersona" type="service_closure" id=".service_locator.T7xmfzk"/>
-        <argument key="App\Controller\ProfesorController:addProfesor" type="service_closure" id=".service_locator.ju8mKQU"/>
+        <argument key="App\Controller\ProfesorController:addProfesor" type="service_closure" id=".service_locator.CGOCeSe"/>
         <argument key="App\Controller\ProfesorController:getProfesor" type="service_closure" id=".service_locator.T7xmfzk"/>
         <argument key="App\Controller\ReservaController:getReservas" type="service_closure" id=".service_locator.T_NOTpo"/>
         <argument key="App\Controller\ReservaController:getReservasPorCanchasPorFecha" type="service_closure" id=".service_locator.T_NOTpo"/>
@@ -7327,12 +7332,12 @@
       <argument type="service" id="security.token_storage"/>
     </service>
     <service id="debug.argument_resolver.service.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">
-      <argument type="service" id=".service_locator.3moxMcA"/>
+      <argument type="service" id=".service_locator.c_vn232"/>
     </service>
     <service id="debug.argument_resolver.default.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver"/>
     <service id="debug.argument_resolver.variadic.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver"/>
     <service id="debug.argument_resolver.not_tagged_controller.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver">
-      <argument type="service" id=".service_locator.3moxMcA"/>
+      <argument type="service" id=".service_locator.c_vn232"/>
     </service>
     <service id="debug.traced.messenger.bus.default.inner" class="Symfony\Component\Messenger\MessageBus">
       <argument type="iterator">
@@ -8297,7 +8302,7 @@
     <service id="sensio_framework_extra.security.expression_language" alias="sensio_framework_extra.security.expression_language.default"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.gSv9zYw" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.3moxMcA"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.c_vn232"/>
     <service id="session" alias=".session.do-not-use" public="true">
       <deprecated package="symfony/framework-bundle" version="5.3">The "%alias_id%" service and "SessionInterface" alias are deprecated, use "$requestStack-&gt;getSession()" instead.</deprecated>
     </service>
@@ -8322,7 +8327,7 @@
     <service id=".service_locator.h8Jkkd2" alias="messenger.retry_strategy_locator"/>
     <service id=".service_locator.0GV1BZZ" alias=".service_locator.gSv9zYw"/>
     <service id=".service_locator.R001GYk" alias=".service_locator.wyNId4a"/>
-    <service id=".service_locator.2RyoJsL" alias=".service_locator.3moxMcA"/>
+    <service id=".service_locator.j2bMR.L" alias=".service_locator.c_vn232"/>
     <service id=".service_locator.wKF4yn1" alias=".service_locator.19_mNxd"/>
     <service id=".service_locator.Za9MpXe" alias=".service_locator.y4dplYt"/>
     <service id=".service_locator.nk0lT0X" alias=".service_locator.1kmbKC8"/>
@@ -8354,7 +8359,7 @@
     <service id=".service_locator.T8.TLJR" alias=".service_locator.T7xmfzk"/>
     <service id=".service_locator.nErTwCG" alias=".service_locator.wyNId4a"/>
     <service id=".service_locator.m5XURC_" alias=".service_locator.T_NOTpo"/>
-    <service id=".service_locator.dNJiejL" alias=".service_locator.ju8mKQU"/>
+    <service id=".service_locator.wcRkmPP" alias=".service_locator.CGOCeSe"/>
     <service id=".service_locator.Wd_D6Iy" alias=".service_locator.GNc8e5B"/>
     <service id=".service_locator.L0rFhJm" alias=".service_locator.GVyCdgr"/>
     <service id=".service_locator.9YCWxeJ" alias=".service_locator.dw8O4oN"/>

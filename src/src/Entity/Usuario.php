@@ -37,10 +37,13 @@ class Usuario
      */
     private $fechareplica;
 
+
+    
     /**
      * @ORM\OneToOne(targetEntity="Profesor", mappedBy="usuario")
      */
     private $profesor;
+
 
     public function getId(): ?int
     {
@@ -94,7 +97,6 @@ class Usuario
 
         return $this;
     }
-
     public function getProfesor(): ?Profesor
     {
         return $this->profesor;

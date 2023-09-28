@@ -28,17 +28,18 @@ class Profesor
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=15)
+     * @ORM\Column(type="string", length=30)
      */
     private $telefono;
+
+
     /**
      * @ORM\OneToOne(targetEntity="Usuario", cascade={"persist"}, inversedBy="profesor")
      * @ORM\JoinColumn(name="id", referencedColumnName="id")
      */
 
-    private $usuario;
-
-
+     private $usuario;
+    
     public function getId(): ?int
     {
         return $this->id;
@@ -80,15 +81,18 @@ class Profesor
         return $this;
     }
 
-    public function getUsuario(): ?Usuario
+    public function getUsuario(): ?self
     {
         return $this->usuario;
     }
 
-    public function setUsuario(?Usuario $usuario): void
+    public function setUsuario(self $usuario): self
     {
         $this->usuario = $usuario;
 
-        //return $this;
+        return $this;
     }
+
+  
+
 }

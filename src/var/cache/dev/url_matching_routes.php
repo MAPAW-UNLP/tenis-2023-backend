@@ -22,12 +22,15 @@ return [
         ],
         '/api/pagos_por_persona' => [[['_route' => 'app_Pagos_personaId', '_controller' => 'App\\Controller\\PagosController::getPagosByPersonaId'], null, ['GET' => 0], null, false, false, null]],
         '/api/persona' => [
-            [['_route' => 'app_personas', '_controller' => 'App\\Controller\\PersonaController::getPersona'], null, ['GET' => 0], null, false, false, null],
             [['_route' => 'app_alta_persona', '_controller' => 'App\\Controller\\PersonaController::addPersona'], null, ['POST' => 0], null, false, false, null],
             [['_route' => 'app_mod_persona', '_controller' => 'App\\Controller\\PersonaController::modPersona'], null, ['PUT' => 0], null, false, false, null],
         ],
         '/api/alumnos' => [[['_route' => 'app_alumnos', '_controller' => 'App\\Controller\\PersonaController::getAlumnos'], null, ['GET' => 0], null, false, false, null]],
         '/api/profesores' => [[['_route' => 'app_profesores', '_controller' => 'App\\Controller\\PersonaController::getProfesores'], null, ['GET' => 0], null, false, false, null]],
+        '/profesor' => [
+            [['_route' => 'app_personas', '_controller' => 'App\\Controller\\ProfesorController::getProfesor'], null, ['GET' => 0], null, false, false, null],
+            [['_route' => 'app_alta_profesor', '_controller' => 'App\\Controller\\ProfesorController::addProfesor'], null, ['POST' => 0], null, false, false, null],
+        ],
         '/api/reservas' => [[['_route' => 'app_reservas', '_controller' => 'App\\Controller\\ReservaController::getReservas'], null, ['GET' => 0], null, false, false, null]],
         '/api/reservas_por_canchas_por_fecha' => [[['_route' => 'app_reservas_por_canchas_por_fecha', '_controller' => 'App\\Controller\\ReservaController::getReservasPorCanchasPorFecha'], null, ['GET' => 0], null, false, false, null]],
         '/api/reserva' => [[['_route' => 'app_alta_reserva', '_controller' => 'App\\Controller\\ReservaController::postReserva'], null, ['POST' => 0], null, false, false, null]],

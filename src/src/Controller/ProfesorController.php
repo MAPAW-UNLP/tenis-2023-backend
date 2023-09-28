@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use App\Service\CorreoService;
 
 class ProfesorController extends AbstractController
 {
@@ -22,6 +24,15 @@ class ProfesorController extends AbstractController
     //         'controller_name' => 'ProfesorController',
     //     ]);
     // }
+
+    private $correoService;
+
+    public function __construct(CorreoService $correoService)
+    {
+        $this->correoService = $correoService;
+    }
+
+
 
     public function getProfesores(): Response
     {
@@ -36,14 +47,15 @@ class ProfesorController extends AbstractController
     {
         $profesorId = $request->query->get('profesorId');
         $em = $doctrine->getManager();
-        $profesor = $em->getRepository( Profesor::class )->findOneById($profesorId);
+        $profesor = $em->getRepository( Profesor::class )->findOneById($profesorId); // pensar en cambiar a Email
         return $this->json($profesor);
     }
 
     /**
      * @Route("/profesor", name="app_alta_profesor", methods={"POST"})
      */
-    public function addProfesor(Request $request, ManagerRegistry $doctrine, EntityManagerInterface $entityManager): Response
+    public function addProfesor(Request $request, ManagerRegistry $doctrine,
+     EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder): Response
     {
 
         $data = json_decode( $request->getContent());
@@ -57,10 +69,16 @@ class ProfesorController extends AbstractController
         $profesor->setNombre($nombre);
         $profesor->setEmail($email);
         // AGREGAR CONTRASEÑA CON JWT O SECURITY DE SYMFONY
-        // $usuario->setPassword('');
-        $usuario->setUsername($profesor->getEmail());
-
+        // // $usuario->setPassword('');
+        $contrasenaAleatoria = $this->generarContrasenaAleatoria();
+        $usuario->setPassword($passwordEncoder->encodePassword($profesor, $contrasenaAleatoria));
+       
+        $usuario->setUsername($profesor->getEmail()); // cambiar método
+        $usuario->setProfesor($profesor); // Idem
         $profesor->setUsuario($usuario);
+        // $this->correoService->enviarCorreoCreacionProfesor($email, $nombre, $password);
+
+
 
         $em = $doctrine->getManager();
         $em->persist($profesor);
@@ -84,6 +102,16 @@ class ProfesorController extends AbstractController
         }
 
         return $this->json(($resp));
+    }
+
+
+
+
+    private function generarContrasenaAleatoria()
+    {
+        $length = 12; // Longitud de la contraseña aleatoria (ajusta según tus preferencias)
+        $bytes = random_bytes($length);
+        return base64_encode($bytes);
     }
 
 
