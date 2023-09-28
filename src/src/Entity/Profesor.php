@@ -86,7 +86,7 @@ class Profesor
         return $this->usuario;
     }
 
-    public function setUsuario(self $usuario): self
+    public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
 
