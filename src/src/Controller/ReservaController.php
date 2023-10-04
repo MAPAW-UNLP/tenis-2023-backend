@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Service\CustomService as ServiceCustomService;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -202,122 +203,164 @@ class ReservaController extends AbstractController
     /**
      * @Route("/profesor-reserva", name="app_alta_profesor_reserva", methods={"POST"})
      */
-    public function storeProfesorReserva(Request $request, ManagerRegistry $doctrine, ServiceCustomService $cs, ValidatorInterface $validator): Response
+    public function storeProfesorReserva(Request $request, ManagerRegistry $doctrine, ServiceCustomService $cs): Response
     {
-        $data = json_decode($request->getContent(), true);
+        try {
+            $data = json_decode($request->getContent(), true);
 
-        $em = $doctrine->getManager();
+            $em = $doctrine->getManager();
 
-        $fechaInicio = new DateTime($data['fecha_ini']);
-        $fechaFin = new DateTime($data['fecha_fin']);
-        $horaIni = new DateTime($data['hora_ini']);
-        $horaFin = new DateTime($data['hora_fin']);
-        $alumnos = $data['alumnos'];
+            $fechaInicio = new DateTime($data['fecha_ini']);
+            $fechaFin = new DateTime($data['fecha_fin']);
+            $horaIni = new DateTime($data['hora_ini']);
+            $horaFin = new DateTime($data['hora_fin']);
+            $canchaId = $data['cancha_id'];
+            $alumnos = $data['alumnos'];
 
-        if ($fechaFin > $fechaInicio) {
-            $fechas_ocupadas = [];
-            $nueva_cancha_reservada = [];
-
-            // Funcion para filtrar antes de reservar
-            /* $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdBetweenDatesAndTime($data['cancha_id'], $fechaInicio, $fechaFin, $horaIni, $horaFin); */
-
-            while ($fechaInicio <= $fechaFin) {
-                $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdAndDateAndTime($data['cancha_id'], $fechaInicio, $horaIni, $horaFin);
-
-                $reserva = new Reserva(
-                    $fechaInicio,
-                    $horaIni,
-                    $horaFin,
-                    1, // TODO: cambiar por el usuario autenticado del momento (Profesor)
-                    $data['cancha_id'],
-                    2, // tipo_clase_id (Siempre en grupo)
-                    0, // replica
-                    0 // estado
-                );
-
-                if ($reservas == null) {
-                    // Clase grupal
-                    $reservaId =  $em->persist($reserva);
-                    $em->flush();
-                } else {
-                    $reserva_otra_cancha = $cs->getIdCanchaDisponible($reserva, $fechaInicio);
-
-                    if ($reserva_otra_cancha != 0) {
-                        $reserva->setCanchaId($reserva_otra_cancha);
-                        $em->persist($reserva);
-                        $em->flush();
-                        array_push($nueva_cancha_reservada, ['cancha' => $reserva_otra_cancha, 'fecha' => $fechaInicio->format('Y-m-d')]);
-                    } else {
-                        array_push($fechas_ocupadas, $fechaInicio->format('Y-m-d'));
-                    }
-                }
-
-                $this->add_people_to_group($alumnos, $em, $cs);
-                if ($data['repite'] == 'Todas las semanas') {
-                    $fechaInicio->add(new DateInterval('P1W'));
-                } elseif ($data['repite'] == 'Todos los meses') {
-                    $fechaInicio->add(new DateInterval('P1M'));
-                } else {
-                    $fechaInicio->add(new DateInterval('P1D'));
-                }
+            if ($fechaFin > $fechaInicio) {
+                return $this->rangeReservationProfesor($canchaId, $fechaInicio, $fechaFin, $horaIni, $horaFin, $alumnos, $em, $cs, $data);
+            } else {
+                return $this->singleReservationProfesor($canchaId, $fechaInicio, $horaIni, $horaFin, $alumnos, $em, $cs, $data);
             }
 
-            if ($fechas_ocupadas != null) {
-                return new JsonResponse(['error' => 'Fechas y Horarios no disponibles', 'fechas_ocupadas' => $fechas_ocupadas, 'message' => 'Se reservaran únicamente las fechas disponibles, en el horario indicado'], 409);
-            }
+            return new JsonResponse(['data' => [
+                'message' => 'Creado con éxito',
+                'data' => $data,
+            ]], 201);
+        } catch (\Throwable $th) {
+            return new JsonResponse(['data' => [
+                'message' => 'Error al crear',
+                'data' => $data,
+                'error' => $th->getMessage()
+            ]], 409);
+        }
+    }
 
-            return new JsonResponse(['data' => $data, 'message' => 'Creado con éxito', 'nueva_cancha_reservada' => $nueva_cancha_reservada], 201);
-        } else {
-            // Fecha inicio = Fecha fin
-            $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdAndDateAndTime($data['cancha_id'], $fechaInicio, $horaIni, $horaFin);
+    public function rangeReservationProfesor($canchaId, $fechaInicio, $fechaFin, $horaIni, $horaFin, $alumnos, $em, $cs, $data)
+    {
+        $fechas_ocupadas = [];
+        $nueva_cancha_reservada = [];
+
+        // Funcion para filtrar antes de reservar
+        /* $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasBycanchaIdBetweenDatesAndTime($data['cancha_id'], $fechaInicio, $fechaFin, $horaIni, $horaFin); */
+
+        while ($fechaInicio <= $fechaFin) {
 
             $reserva = new Reserva(
                 $fechaInicio,
                 $horaIni,
                 $horaFin,
                 1, // TODO: cambiar por el usuario autenticado del momento (Profesor)
-                $data['cancha_id'],
-                2, // tipo_clase_id (Siempre en grupo)
+                $canchaId,
+                count($alumnos) > 1 ? 2 : 1, // tipo_clase_id (Siempre en grupo)
                 0, // replica
                 0 // estado
             );
 
-            if ($reservas == null) {
-
+            if ($cs->without_reservations($canchaId, $fechaInicio, $horaIni, $horaFin)) {
+                // Clase grupal
                 $em->persist($reserva);
                 $em->flush();
-
-                $this->add_people_to_group($alumnos, $em, $cs);
+                $cs->add_people_to_group($alumnos);
             } else {
                 $reserva_otra_cancha = $cs->getIdCanchaDisponible($reserva, $fechaInicio);
+
                 if ($reserva_otra_cancha != 0) {
                     $reserva->setCanchaId($reserva_otra_cancha);
                     $em->persist($reserva);
                     $em->flush();
-
-                    $this->add_people_to_group($alumnos, $em, $cs);
-
-                    return new JsonResponse(['data' => $data, 'message' => 'La cancha seleccionada no estaba disponible y le reservamos la cancha ' . $reserva_otra_cancha], 201);
+                    $cs->add_people_to_group($alumnos);
+                    array_push($nueva_cancha_reservada, ['cancha_id' => $reserva_otra_cancha, 'fecha' => $fechaInicio->format('Y-m-d')]);
                 } else {
-                    return new JsonResponse(['error' => 'Horario no disponible', 'message' => 'El horario seleccionado ya ha sido reservado. Por favor, elige otro horario.'], 409);
+                    array_push($fechas_ocupadas, $fechaInicio->format('Y-m-d'));
                 }
+            }
+
+            if ($data['repite'] == 'Todas las semanas') {
+                $fechaInicio->add(new DateInterval('P1W'));
+            } elseif ($data['repite'] == 'Todos los meses') {
+                $fechaInicio->add(new DateInterval('P1M'));
+            } else {
+                $fechaInicio->add(new DateInterval('P1D'));
             }
         }
 
-        return new JsonResponse(['data' => $data, 'message' => 'Creado con éxito'], 201);
+        if ($fechas_ocupadas != null) {
+            if ($nueva_cancha_reservada != null) {
+                return new JsonResponse(['data' => [
+                    'message' => 'Hemos reservado las fechas y horario en las canchas disponibles.',
+                    'fechas_ocupadas' => $fechas_ocupadas,
+                    'nueva_reservas' => $nueva_cancha_reservada,
+                ]], 409);
+            } else {
+                return new JsonResponse(['data' => [
+                    'error' => 'Fecha y Horario no disponible',
+                    'message' => 'Lo sentimos, no tenemos canchas disponibles en las fechas seleccionadas.',
+                    'fechas_ocupadas' => $fechas_ocupadas,
+                ]], 409);
+            }
+            return new JsonResponse(['data' => [
+                'message' => 'Se reservaran únicamente las fechas disponibles, en el horario indicado',
+                'fechas_ocupadas' => $fechas_ocupadas,
+                'nueva_reservas' => $nueva_cancha_reservada,
+            ]], 409);
+        }
+
+        return new JsonResponse(['data' => [
+            'message' => 'Reserva registrada con éxito',
+            'nueva_cancha_reservada' => $nueva_cancha_reservada
+        ]], 201);
     }
 
-    public function add_people_to_group($alumnos, $em, $cs)
+    public function singleReservationProfesor($canchaId, $fechaInicio, $horaIni, $horaFin, $alumnos, $em, $cs, $data)
     {
-        $lastReservaId = (int) $cs->getLastReservaId();
+        // Fecha inicio = Fecha fin
+        $reserva = new Reserva(
+            $fechaInicio,
+            $horaIni,
+            $horaFin,
+            1, // TODO: cambiar por el usuario autenticado del momento (Profesor)
+            $canchaId,
+            count($alumnos) > 1 ? 2 : 1, // tipo_clase_id (1 = individual, 2 = grupal)
+            0, // replica
+            0 // estado
+        );
 
-        foreach ($alumnos as $alumno_id) {
-            $grupo_alumno = new Grupo();
-            $grupo_alumno->setReservaId($lastReservaId);
-            $grupo_alumno->setPersonaId($alumno_id);
-            $em->persist($grupo_alumno);
+        if ($cs->without_reservations($canchaId, $fechaInicio, $horaIni, $horaFin)) {
+
+            $em->persist($reserva);
+            $em->flush();
+
+            $cs->add_people_to_group($alumnos);
+
+            return new JsonResponse([
+                'data' => [
+                    'message' => 'Reserva registrada con éxito',
+                    'data' => $data
+                ]
+            ], 201);
+        } else {
+            $reserva_otra_cancha = $cs->getIdCanchaDisponible($reserva, $fechaInicio);
+            if ($reserva_otra_cancha != 0) {
+                $reserva->setCanchaId($reserva_otra_cancha);
+                $em->persist($reserva);
+                $em->flush();
+
+                $cs->add_people_to_group($alumnos);
+                $data['cancha_id'] = $reserva_otra_cancha;
+
+                return new JsonResponse(['data' => [
+                    'error' => 'Cancha ' . $canchaId . ' no disponible',
+                    'message' => 'La cancha seleccionada no estaba disponible y le reservamos la cancha ' . $reserva_otra_cancha,
+                    'data' => $data,
+                ]], 201);
+            } else {
+                return new JsonResponse(['data' => [
+                    'error' => 'Horario no disponible',
+                    'message' => 'El horario seleccionado ya ha sido reservado. Por favor, elige otro horario.'
+                ]], 409);
+            }
         }
-        $em->flush();
     }
 
     /**
@@ -327,7 +370,7 @@ class ReservaController extends AbstractController
     {
         $profesorId = 1; // TODO: Cambiar por el usuario autenticado del momento
 
-        $reservas = $this->getDoctrine()->getRepository(Reserva::class)->findReservasProfesor($profesorId);
+        $reservas = $cs->get_my_reservations($profesorId);
 
         $rtaReservas =  array();
         foreach ($reservas as $reserva) {
@@ -336,9 +379,15 @@ class ReservaController extends AbstractController
         }
 
         if ($rtaReservas == null) {
-            return new JsonResponse(['data' => $rtaReservas, 'message' => 'No se encontraron resultados que coincidan con los criterios de búsqueda.'], 200);
+            return new JsonResponse(['data' => [
+                'message' => 'No se encontraron resultados que coincidan con los criterios de búsqueda.',
+                'mis_reservas' => $rtaReservas
+            ]], 200);
         } else {
-            return new JsonResponse(['data' => $rtaReservas, 'message' => 'Ok'], 200);
+            return new JsonResponse(['data' => [
+                'message' => 'Estas son sus reservas:',
+                'mis_reservas' => $rtaReservas
+            ]], 200);
         }
     }
 
