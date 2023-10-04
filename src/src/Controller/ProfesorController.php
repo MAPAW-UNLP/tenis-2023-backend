@@ -6,6 +6,7 @@ use App\Entity\Profesor;
 use App\Entity\Usuario;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,11 +14,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use App\Service\CorreoService;
 
+/**
+ * @Route(path="/api")
+ */
 class ProfesorController extends AbstractController
 {
-    /**
-     * @Route("/profesores", name="app_profesor", methods={"GET"})
-     */
+
     // public function index(): Response
     // {
     //     return $this->render('profesor/index.html.twig', [
@@ -33,15 +35,19 @@ class ProfesorController extends AbstractController
     // }
 
 
-
+    /**
+     * @Route("/profesoress", name="app_profesoress", methods={"GET"})
+     */
     public function getProfesores(): Response
     {
         $profesores = $this->getDoctrine()->getRepository( Profesor::class )->findAll();
+//        return new JsonResponse($profesores);
         return $this->json($profesores);
+
     }
 
     /**
-     * @Route("/profesor", name="app_personas", methods={"GET"})
+     * @Route("/profesorr", name="app_personass", methods={"GET"})
      */
     public function getProfesor(Request $request, ManagerRegistry $doctrine): Response
     {
@@ -52,7 +58,7 @@ class ProfesorController extends AbstractController
     }
 
     /**
-     * @Route("/profesor", name="app_alta_profesor", methods={"POST"})
+     * @Route("/profesorr", name="app_alta_profesorr", methods={"POST"})
      */
     public function addProfesor(Request $request, ManagerRegistry $doctrine,
      EntityManagerInterface $entityManager): Response

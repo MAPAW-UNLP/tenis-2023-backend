@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProfesorRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 /**
  * @ORM\Entity(repositoryClass=ProfesorRepository::class)
@@ -81,7 +82,8 @@ class Profesor
         return $this;
     }
 
-    public function getUsuario(): ?self
+    /** @Ignore() */
+    public function getUsuario(): ?Usuario
     {
         return $this->usuario;
     }
@@ -92,7 +94,5 @@ class Profesor
 
         return $this;
     }
-
-  
 
 }

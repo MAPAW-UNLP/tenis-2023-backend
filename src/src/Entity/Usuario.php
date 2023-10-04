@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UsuarioRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UsuarioRepository::class)
@@ -12,6 +13,7 @@ class Usuario
 {
     /**
      * @ORM\Id
+     * @Groups("usuario")
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
@@ -40,6 +42,7 @@ class Usuario
 
     
     /**
+     * @Groups("usuario")
      * @ORM\OneToOne(targetEntity="Profesor", mappedBy="usuario")
      */
     private $profesor;
