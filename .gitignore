@@ -1,2 +1,4 @@
 src/vendor
 .DS_Store
+src/var
+.idea

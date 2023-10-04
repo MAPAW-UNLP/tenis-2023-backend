@@ -1,5 +1,0 @@
-a8ca0f,192.168.112.1,GET,http://localhost:8083/,1694040356,,404
-62e34c,192.168.112.1,GET,http://localhost:8083/api/reservas,1694040365,,200
-1bb565,192.168.112.1,GET,http://localhost:8083/api/alquiler,1694040378,,200
-fa1716,192.168.128.1,GET,http://localhost:8083/api/reservas,1694040823,,200
-c6ac29,192.168.160.1,GET,http://localhost:8083/api/reservas,1694041153,,200
