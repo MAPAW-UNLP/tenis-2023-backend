@@ -1,5 +1,3 @@
 src/vendor
-src/var/*
-
-.DS_Store
+src/var
 .idea

@@ -41,9 +41,8 @@ class ProfesorController extends AbstractController
     public function getProfesores(): Response
     {
         $profesores = $this->getDoctrine()->getRepository( Profesor::class )->findAll();
-//        return new JsonResponse($profesores);
-        return $this->json($profesores);
 
+        return $this->json($profesores);
     }
 
     /**
@@ -84,8 +83,6 @@ class ProfesorController extends AbstractController
         $profesor->setUsuario($usuario);
         // $this->correoService->enviarCorreoCreacionProfesor($email, $nombre, $password);
 
-
-
         $em = $doctrine->getManager();
         $em->persist($profesor);
         $em->flush();
@@ -110,8 +107,44 @@ class ProfesorController extends AbstractController
         return $this->json(($resp));
     }
 
+    /**
+     * @Route("/profesorr", name="app_mod_persona", methods={"PUT"})
+     */
+    public function modProfesor(Request $request, ManagerRegistry $doctrine): Response {
+        $data = json_decode( $request->getContent());
+        $profesorId = $data->id;
+        $resp = array();
 
+        if ($profesorId != null) {
+            $em = $doctrine->getManager();
+            $profesor = $em->getRepository( Profesor::class )->findOneById($profesorId);
 
+            if ($profesor!=null){
+                if (isset($data->nombre)){
+                    $profesor->setNombre($data->nombre);
+                }
+                if (isset($data->telefono)){
+                    $profesor->setTelefono($data->telefono);
+                }
+                if (isset($data->email)){
+                    $profesor->setEmail($data->email);
+                }
+
+                $em->persist($profesor);
+                $em->flush();
+
+                $resp['rta'] =  "ok";
+                $resp['detail'] = "Profesor modificado correctamente";
+            } else {
+                $resp['rta'] =  "error";
+                $resp['detail'] = "No existe el profesor";
+            }
+        } else {
+            $resp['rta'] =  "error";
+            $resp['detail'] = "Debe proveer un id";
+        }
+        return $this->json($resp);
+    }
 
     private function generarContrasenaAleatoria()
     {
@@ -119,7 +152,5 @@ class ProfesorController extends AbstractController
         $bytes = random_bytes($length);
         return base64_encode($bytes);
     }
-
-
-
 }
+
