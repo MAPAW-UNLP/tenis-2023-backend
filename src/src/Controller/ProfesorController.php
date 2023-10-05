@@ -107,6 +107,45 @@ class ProfesorController extends AbstractController
         return $this->json(($resp));
     }
 
+    /**
+     * @Route("/profesorr", name="app_mod_persona", methods={"PUT"})
+     */
+    public function modProfesor(Request $request, ManagerRegistry $doctrine): Response {
+        $data = json_decode( $request->getContent());
+        $profesorId = $data->id;
+        $resp = array();
+
+        if ($profesorId != null) {
+            $em = $doctrine->getManager();
+            $profesor = $em->getRepository( Profesor::class )->findOneById($profesorId);
+
+            if ($profesor!=null){
+                if (isset($data->nombre)){
+                    $profesor->setNombre($data->nombre);
+                }
+                if (isset($data->telefono)){
+                    $profesor->setTelefono($data->telefono);
+                }
+                if (isset($data->email)){
+                    $profesor->setEmail($data->email);
+                }
+
+                $em->persist($profesor);
+                $em->flush();
+
+                $resp['rta'] =  "ok";
+                $resp['detail'] = "Profesor modificado correctamente";
+            } else {
+                $resp['rta'] =  "error";
+                $resp['detail'] = "No existe el profesor";
+            }
+        } else {
+            $resp['rta'] =  "error";
+            $resp['detail'] = "Debe proveer un id";
+        }
+        return $this->json($resp);
+    }
+
     private function generarContrasenaAleatoria()
     {
         $length = 12; // Longitud de la contraseña aleatoria
