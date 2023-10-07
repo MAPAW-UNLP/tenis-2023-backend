@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20221115011941 extends AbstractMigration
+final class Version20230928220814 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,14 +20,12 @@ final class Version20221115011941 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE reserva ADD id_tipo_clase INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE usuario ADD fechapagos DATE DEFAULT NULL, ADD fechareplica DATE DEFAULT NULL');
+        $this->addSql('ALTER TABLE profesor ADD CONSTRAINT FK_5B7406D9BF396750 FOREIGN KEY (id) REFERENCES usuario (id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE reserva DROP id_tipo_clase');
-        $this->addSql('ALTER TABLE usuario DROP fechapagos, DROP fechareplica');
+        $this->addSql('ALTER TABLE profesor DROP FOREIGN KEY FK_5B7406D9BF396750');
     }
 }

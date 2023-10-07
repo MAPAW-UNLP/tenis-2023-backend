@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UsuarioRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UsuarioRepository::class)
@@ -12,6 +13,7 @@ class Usuario
 {
     /**
      * @ORM\Id
+     * @Groups("usuario")
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
@@ -36,6 +38,15 @@ class Usuario
      * @ORM\Column(type="date", nullable=true)
      */
     private $fechareplica;
+
+
+    
+    /**
+     * @Groups("usuario")
+     * @ORM\OneToOne(targetEntity="Profesor", mappedBy="usuario")
+     */
+    private $profesor;
+
 
     public function getId(): ?int
     {
@@ -89,4 +100,14 @@ class Usuario
 
         return $this;
     }
+    public function getProfesor(): ?Profesor
+    {
+        return $this->profesor;
+    }
+
+    public function setProfesor(?Profesor $profesor): void
+    {
+        $this->profesor = $profesor;
+    }
+
 }
