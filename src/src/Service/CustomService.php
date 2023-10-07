@@ -45,7 +45,7 @@ class CustomService
 
         if ($reserva->getPersonaId() != null && $reserva->getPersonaId() != 0) {
             // es clase
-            
+
             $titularReservaObj = $this->getPersonaByPersonaId($reserva->getPersonaId());
 
 
@@ -62,7 +62,6 @@ class CustomService
         } else { //es alquiler
 
             $titularReservaObj = $this->getClienteByReservaId($reserva->getId());
-
         }
 
 
@@ -78,7 +77,7 @@ class CustomService
             "replica" => $reserva->isReplica(),
             "estado" => $this->estadosArr[$reserva->getEstadoId()],
             "tipo" => $reserva->getIdTipoClase() != null ? $this->getInfoTipoClase($reserva->getIdTipoClase())[0] : 'ALQUILER',
-            "idTipo" => $reserva->getIdTipoClase() != null ?$reserva->getIdTipoClase() : '0',
+            "idTipo" => $reserva->getIdTipoClase() != null ? $reserva->getIdTipoClase() : '0',
             "grupo" => $grupo
 
         );
@@ -86,12 +85,12 @@ class CustomService
         return $reservaObj;
     }
 
-    public function getInfoTipoClase($idTipoClase){
+    public function getInfoTipoClase($idTipoClase)
+    {
         $clase = $this->em->getRepository(Clases::class)->findOneById($idTipoClase);
-        
+
         // dd($clase);
         return array($clase->getTipo(), $clase->getImporte());
-
     }
 
     public function getFormattedTime(DateTime $time)
@@ -104,7 +103,6 @@ class CustomService
     {
 
         return $fecha->format('Y-m-d');
- 
     }
 
     public function getPersonaByPersonaId($personaId)
@@ -125,11 +123,12 @@ class CustomService
         return $personaObj;
     }
 
-    public function getClienteByReservaId($reservaId){
+    public function getClienteByReservaId($reservaId)
+    {
 
         $cliente = $this->em->getRepository(Alquiler::class)->findAlquilerByReservaId($reservaId);
 
-        if ($cliente != null){
+        if ($cliente != null) {
 
             $clienteObj = array(
                 "nombre" => $cliente->getNombre(),
@@ -143,17 +142,19 @@ class CustomService
         // dd($cliente, $clienteObj);
     }
 
-    public function getLastReservaId(){
+    public function getLastReservaId()
+    {
         $id = $this->em->getRepository(Reserva::class)->getLastRecord();
-        if ($id == null){
+        if ($id == null) {
             return 0;
         }
         return $id[0]->getId();
     }
 
-    public function formatearAlumno($alumno){
+    public function formatearAlumno($alumno)
+    {
 
-        $fechaNac = $alumno->getFechaNac()? $this->getFormattedDate($alumno->getFechaNac()):'';
+        $fechaNac = $alumno->getFechaNac() ? $this->getFormattedDate($alumno->getFechaNac()) : '';
 
         $alumnoFormateado = array(
             "id"    => $alumno->getId(),
@@ -164,14 +165,14 @@ class CustomService
         );
 
         return $alumnoFormateado;
-
     }
 
-    public function replicarReservaNueva($reservaId){
+    public function replicarReservaNueva($reservaId)
+    {
 
         $clase = $this->em->getRepository(Reserva::class)->findOneById($reservaId);
 
-        if (! $clase->isReplica()){
+        if (!$clase->isReplica()) {
             return;
         }
 
@@ -186,13 +187,13 @@ class CustomService
         date_add($mesProximo, date_interval_create_from_date_string("1 month"));
         $nroMesProximo = $mesProximo->format('m');
 
-        
-        for ($i = 0; $i < 10 ; $i++ ){
-            
+
+        for ($i = 0; $i < 10; $i++) {
+
             date_add($fecha, date_interval_create_from_date_string("7 days"));
 
             $idCancha = $this->getIdCanchaDisponible($clase, $fecha);
-            
+
             if (($fecha->format('m') == $nroMesActual || $fecha->format('m') == $nroMesProximo) && $idCancha > 0) {
 
                 $reservaReplicada = clone $clase;
@@ -202,42 +203,41 @@ class CustomService
                 $this->em->flush();
 
                 $idUltimaReserva = $this->getLastReservaId();
-                foreach ($grupo as $itemGrupo){
+                foreach ($grupo as $itemGrupo) {
                     $itemReplicado = clone $itemGrupo;
                     $itemReplicado->setReservaId($idUltimaReserva);
                     $this->em->persist($itemReplicado);
                 }
                 $this->em->flush();
-            } 
+            }
         }
 
-        $this->guardarOActualizarReplicas($reservaId, $nroMesProximo  );
-
+        $this->guardarOActualizarReplicas($reservaId, $nroMesProximo);
     }
 
-    public function guardarOActualizarReplicas($idReserva, $ultimoMes){
+    public function guardarOActualizarReplicas($idReserva, $ultimoMes)
+    {
 
         $replicaEncontrada = $this->em->getRepository(Replicas::class)->findOneByReservaId($idReserva);
 
-        if (isset($replicaEncontrada)){
+        if (isset($replicaEncontrada)) {
 
             $replicaEncontrada->setUltimoMes($ultimoMes);
             $this->em->persist($replicaEncontrada);
-
         } else {
 
             $replica = new Replicas();
-            $replica ->setIdReserva( $idReserva);
+            $replica->setIdReserva($idReserva);
             $replica->setUltimoMes($ultimoMes);
             $this->em->persist($replica);
         }
 
         $this->em->flush();
-        
     }
 
-    public function getIdCanchaDisponible($claseOrig, $fecha){
-        
+    public function getIdCanchaDisponible($claseOrig, $fecha)
+    {
+
         // devolver id de la cancha disponible, preferentemente la original
         // devolver 0 si no hay turno disponible en ninguna cancha
 
@@ -249,20 +249,20 @@ class CustomService
         $canchas =  $this->em->getRepository(Cancha::class)->findAll();
 
 
-        if ($this->isCanchaDisponibleEnTurno($canchaPreferida->getId(), $clase)){
+        if ($this->isCanchaDisponibleEnTurno($canchaPreferida->getId(), $clase)) {
 
             // dd("cancha original disponible", $clase->getCanchaId(), $clase, $fecha); die; // TODO: quitar
 
             return $clase->getCanchaId();
         } else {
 
-            foreach($canchas as $cancha){
+            foreach ($canchas as $cancha) {
 
-                if ($cancha->getId() == $canchaPreferida->getId()){
+                if ($cancha->getId() == $canchaPreferida->getId()) {
                     continue;
                 }
 
-                if  ($this->isCanchaDisponibleEnTurno($cancha->getId(), $clase)){
+                if ($this->isCanchaDisponibleEnTurno($cancha->getId(), $clase)) {
                     // dd("cancha alternativa disponible",  $cancha->getId(), $clase, $fecha); die; // TODO: quitar
 
                     return $cancha->getId();
@@ -282,73 +282,74 @@ class CustomService
 
     }
 
-    public function isCanchaDisponibleEnTurno($id, $clase){
+    public function isCanchaDisponibleEnTurno($id, $clase)
+    {
 
 
-        
+
         $reservasEnCanchaYFecha = $this->em->getRepository(Reserva::class)->findReservasBycanchaIdAndDate($id, $clase->getFecha());
         $disponible = true;
-        
+
         $claseHoraIni = clone $clase->getHoraIni();
-        $claseHoraIni->setDate(2000,01,01);
+        $claseHoraIni->setDate(2000, 01, 01);
         $claseHoraFin = clone $clase->getHoraFin();
-        $claseHoraFin->setDate(2000,01,01);
-        
+        $claseHoraFin->setDate(2000, 01, 01);
+
         // dd( $clase->getHoraFin(),  $clase->getHoraIni());
-        
-        foreach($reservasEnCanchaYFecha as $reserva){
-            
+
+        foreach ($reservasEnCanchaYFecha as $reserva) {
+
             $reservaHoraIni = clone $reserva->getHoraIni();
-            $reservaHoraIni->setDate(2000,01,01);
+            $reservaHoraIni->setDate(2000, 01, 01);
             $reservaHoraFin =  clone $reserva->getHoraFin();
-            $reservaHoraFin->setDate(2000,01,01);
+            $reservaHoraFin->setDate(2000, 01, 01);
 
             // dd ($reservaHoraIni, $reservaHoraFin , $claseHoraIni, $claseHoraFin, $reservaHoraIni > $claseHoraIni, $reservaHoraIni >= $claseHoraIni);die;
 
 
-            if ( ! ($claseHoraFin <= $reservaHoraIni) && ! ($claseHoraIni >= $reservaHoraFin)){
+            if (!($claseHoraFin <= $reservaHoraIni) && !($claseHoraIni >= $reservaHoraFin)) {
                 $disponible = false;
                 break;
             }
-
         }
 
 
         return $disponible;
     }
 
-    public function registrarPago($idPersona, $idTipoClase, $cantidad, $fecha){
+    public function registrarPago($idPersona, $idTipoClase, $cantidad, $fecha)
+    {
 
         $pago = new Pagos();
         $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
-        $fechaPago = isset($fecha)? $fecha : new Date();
+        $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
         $this->em->persist($pago);
         $this->em->flush();
-
     }
 
 
-    public function liquidarReservas(){
+    public function liquidarReservas()
+    {
 
         $usuarioDB = $this->em->getRepository(Usuario::class)->findOneByUsername('admin');
         $fechaPagos = $usuarioDB->getFechapagos();
 
         $fechaDesde = $fechaPagos != null ? $fechaPagos : new DateTime('2022-01-01');
-      
-        $fechaHasta = new DateTime('yesterday');
-        
-        if ( $fechaDesde != $fechaHasta){
 
-            
+        $fechaHasta = new DateTime('yesterday');
+
+        if ($fechaDesde != $fechaHasta) {
+
+
             $reservas =  $this->em->getRepository(Reserva::class)->findReservasBetweenDates($fechaDesde, $fechaHasta);
-            foreach($reservas as $reserva){
-                
+            foreach ($reservas as $reserva) {
+
                 $idPersonasGrupo = $this->em->getRepository(Grupo::class)->findPersonasGrupoIdByReservaId($reserva->getId());
-                
-                foreach($idPersonasGrupo as $personaId){
-                    
-                    
+
+                foreach ($idPersonasGrupo as $personaId) {
+
+
                     $pago = new Pagos();
                     $pago->setIdPersona($personaId->getPersonaId());
                     $pago->setFecha($reserva->getFecha());
@@ -356,35 +357,33 @@ class CustomService
                     $pago->setIdTipoClase($tipoClase);
                     $pago->setCantidad(-1);
                     $this->em->persist($pago);
-                    
                 }
-                
             }
             $usuarioDB->setFechapagos($fechaHasta);
             $this->em->persist($usuarioDB);
             $this->em->flush();
-        } 
-
-    }
-
-
-    public function procesarReplicas(){
-
-        $replicas = $this->em->getRepository(Replicas::class)->findAll();
-
-        foreach($replicas as $replica){
-
-            $this->replicarReservaReplicada($replica->getIdReserva(), $replica->getUltimoMes());
-
         }
     }
 
-    public function replicarReservaReplicada($reservaId, $replicadaHastaMes){
-        
+
+    public function procesarReplicas()
+    {
+
+        $replicas = $this->em->getRepository(Replicas::class)->findAll();
+
+        foreach ($replicas as $replica) {
+
+            $this->replicarReservaReplicada($replica->getIdReserva(), $replica->getUltimoMes());
+        }
+    }
+
+    public function replicarReservaReplicada($reservaId, $replicadaHastaMes)
+    {
+
         $fechaHoy = new DateTime();
         $mesActual = $fechaHoy->format('m');
 
-        if ($mesActual != $replicadaHastaMes){
+        if ($mesActual != $replicadaHastaMes) {
             return;
         }
 
@@ -401,14 +400,14 @@ class CustomService
 
         do { // sumo una semana hasta llegar al mes que hay que replicar
             date_add($fecha, date_interval_create_from_date_string("7 days"));
-        } while ( $fecha->format('m') != $nroMesProximo );
-        
-        
-        do{ // guardo clases nuevas hasta terminar el mes
-            
+        } while ($fecha->format('m') != $nroMesProximo);
+
+
+        do { // guardo clases nuevas hasta terminar el mes
+
             $idCancha = $this->getIdCanchaDisponible($clase, $fecha);
-            
-            if (  $idCancha > 0) {
+
+            if ($idCancha > 0) {
 
                 $reservaReplicada = clone $clase;
                 $reservaReplicada->setFecha(clone $fecha);
@@ -417,28 +416,48 @@ class CustomService
                 $this->em->flush();
 
                 $idUltimaReserva = $this->getLastReservaId();
-                foreach ($grupo as $itemGrupo){
+                foreach ($grupo as $itemGrupo) {
                     $itemReplicado = clone $itemGrupo;
                     $itemReplicado->setReservaId($idUltimaReserva);
                     $this->em->persist($itemReplicado);
                 }
                 $this->em->flush();
-            } 
+            }
 
             date_add($fecha, date_interval_create_from_date_string("7 days"));
+        } while ($fecha->format('m') == $nroMesProximo);
 
-        } while ( $fecha->format('m') == $nroMesProximo );
-
-        $this->guardarOActualizarReplicas($reservaId, $nroMesProximo  );
-
+        $this->guardarOActualizarReplicas($reservaId, $nroMesProximo);
     }
 
-    public function procesamientoInicial(){
+    public function procesamientoInicial()
+    {
 
         $this->procesarReplicas();
         $this->liquidarReservas();
-
     }
 
 
+    public function add_people_to_group($alumnos)
+    {
+        $lastReservaId = (int) $this->getLastReservaId();
+
+        foreach ($alumnos as $alumno_id) {
+            $grupo_alumno = new Grupo();
+            $grupo_alumno->setReservaId($lastReservaId);
+            $grupo_alumno->setPersonaId($alumno_id);
+            $this->em->persist($grupo_alumno);
+            $this->em->flush();
+        }
+    }
+
+    public function without_reservations($canchaId, $fechaInicio, $horaIni, $horaFin)
+    {
+        return $this->em->getRepository(Reserva::class)->findReservasBycanchaIdAndDateAndTime($canchaId, $fechaInicio, $horaIni, $horaFin) == null;
+    }
+
+    public function get_my_reservations($profesorId)
+    {
+        return $this->em->getRepository(Reserva::class)->findReservasProfesor($profesorId);
+    }
 }
