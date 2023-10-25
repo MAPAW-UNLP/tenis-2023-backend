@@ -47,6 +47,16 @@ class Usuario
      */
     private $profesor;
 
+    /**
+     * @Groups("usuario")
+     * @ORM\OneToOne(targetEntity="Administrador", mappedBy="usuario")
+     */
+    private $administrador;
+
+    /**
+     * @ORM\Column(type="string", length=30)
+     */
+    private $rol;
 
     public function getId(): ?int
     {
@@ -109,5 +119,28 @@ class Usuario
     {
         $this->profesor = $profesor;
     }
+
+    public function getAdministrador(): ?Administrador
+    {
+        return $this->administrador;
+    }
+
+    public function setAdministrador(?Administrador $administrador): void
+    {
+        $this->administrador = $administrador;
+    }
+
+    public function getRol(): ?string
+    {
+        return $this->rol;
+    }
+
+    public function setRol(string $rol): self
+    {
+        $this->rol = $rol;
+
+        return $this;
+    }
+
 
 }

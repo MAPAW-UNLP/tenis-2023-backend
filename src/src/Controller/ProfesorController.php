@@ -11,8 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use App\Service\CorreoService;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route(path="/api")
@@ -38,8 +38,9 @@ class ProfesorController extends AbstractController
     /**
      * @Route("/profesoress", name="app_profesoress", methods={"GET"})
      */
-    public function getProfesores(): Response
-    {
+    public function getProfesores(): Response // CHEQUEAR QUE ISGRANTED NO ROMPA EN EL FRONT
+    {   // NOTE: SEGURAMENTE LARGUE ALGUNA EXCEP SI UN USUARIO QUE NO TIENE EL ROL QUIERA ENTRAR, 
+        //VEIRIFCAR CON ISGRANTED ACA ADENTRO
         $profesores = $this->getDoctrine()->getRepository( Profesor::class )->findAll();
 
         return $this->json($profesores);
@@ -75,11 +76,11 @@ class ProfesorController extends AbstractController
         $profesor->setEmail($email);
 
         $contrasenaAleatoria = $this->generarContrasenaAleatoria();
-        // $usuario->setPassword($passwordEncoder->encodePassword($contrasenaAleatoria, 8));
         $usuario->setPassword($contrasenaAleatoria);
 
         $usuario->setUsername($profesor->getEmail()); // cambiar método desde el profesor
         $usuario->setProfesor($profesor); // Idem
+        $usuario->setRol('ROLE_PROFESOR'); // seteo el nombre del rol, para podes acceder a las rutas
         $profesor->setUsuario($usuario);
         // $this->correoService->enviarCorreoCreacionProfesor($email, $nombre, $password);
 
