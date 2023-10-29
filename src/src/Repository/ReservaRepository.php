@@ -30,6 +30,15 @@ class ReservaRepository extends ServiceEntityRepository
         }
     }
 
+    public function edit(Reserva $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     public function remove(Reserva $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -128,6 +137,35 @@ class ReservaRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return Reserva[] Returns an array of Reserva objects
+     */
+    public function findReservasProfesorByDateAndTime($persona_id, $fecha, $hora): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.persona_id = :val1')
+            ->setParameter('val1', $persona_id)
+            ->andWhere('u.fecha = :val2')
+            ->setParameter('val2', $fecha)
+            ->andWhere('u.hora_ini = :val3')
+            ->setParameter('val3', $hora)
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    /* public function changeEstadoReserva($id, $estado_id): void
+    {
+        $this->createQueryBuilder('r')
+            ->update()
+            ->set('r.estado_id', '?1')
+            ->where('r.id = ?2')
+            ->setParameter(1, $estado_id)
+            ->setParameter(2, $id)
+            ->getQuery()
+            ->execute();
+    } */
 
     //    public function findOverlap($fecha, $horaIni, $horaFin){ // TODO: implementar funcion
     //     $entityManager = $this->getEntityManager();
