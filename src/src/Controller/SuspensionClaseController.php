@@ -88,11 +88,12 @@ class SuspensionClaseController extends AbstractController
     }
 
     /**
-     * @Route("/mis-solicitudes/{profesor_id}", name="app_suspension_clase_index", methods={"GET"})
+     * @Route("/mis-solicitudes", name="app_suspension_clase_index", methods={"GET"})
      */
-    public function indexMisSolicitudes($profesor_id, SuspensionClaseRepository $suspensionClaseRepository): Response
+    public function indexMisSolicitudes(SuspensionClaseRepository $suspensionClaseRepository): Response
     {
-        $solicitudes = $suspensionClaseRepository->findSuspensionesClasesByProfesorId($profesor_id);
+        // TODO: Cambiar 1 por usuario logueado del momento.
+        $solicitudes = $suspensionClaseRepository->findSuspensionesClasesByProfesorId(1);
         if ($solicitudes) {
             return $this->json([
                 'message' => 'Se han encontrado las siguientes solicitudes de suspensión de clase.',
