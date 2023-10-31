@@ -13,6 +13,7 @@ use App\Entity\Persona;
 use App\Entity\Replicas;
 use App\Entity\Reserva;
 use App\Entity\Usuario;
+use App\Entity\Cobro;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Constraints\Date;
@@ -328,6 +329,16 @@ class CustomService
         $this->em->flush();
     }
 
+    public function registrarCobro($idPersona, $idTipoClase, $cantidad, $fecha)
+    {
+
+        $pago = new Cobro();
+        $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $fechaPago = isset($fecha) ? $fecha : new Date();
+        $pago->setFecha($fechaPago);
+        $this->em->persist($pago);
+        $this->em->flush();
+    }
 
     public function liquidarReservas()
     {
