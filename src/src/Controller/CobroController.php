@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Alumno;
 use App\Entity\Cobro;
-use App\Entity\Persona;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +30,7 @@ class CobroController extends AbstractController
     // }
 
     
- /**
+    /**
      * @Route("/cobros", name="get_cobros", methods={"GET"})
      */
     public function getCobros(
@@ -47,73 +47,72 @@ class CobroController extends AbstractController
         $objCobros = array();
         foreach($cobros as $cobro){
 
-            $nombrePersona =  $em->getRepository( Persona ::class )->findOneById($cobro->getIdPersona())->getNombre();
-
            array_push($objCobros, array(
             // utilizar el atributo concepto, ya no el id de tipodeclase            
-            "idPersona" => $cobro->getIdPersona(),
-            "nombrePersona" => $nombrePersona,
-            "idTipoClase" => $cobro->getIdTipoClase(), 
+            "idAlumno" => $cobro->getAlumno()->getId(),
+            "nombreAlumno" => $cobro->getAlumno()->getNombre(),
+            "apellidoAlumno" => $cobro->getAlumno()->getApellido(),
             "cantidad" => $cobro->getCantidad(), 
-            "fecha" => $cs->getFormattedDate($cobro->getFecha())));
+            "fecha" => $cs->getFormattedDate($cobro->getFecha()),
+            "concepto" => $cobro->getConcepto()
+
+            ));
         }
         return $this->json($objCobros);
     }
 
 
     /**
-     * @Route("/cobros_por_persona", name="app_Cobros_personaId", methods={"GET"})
-     */
+     * @Route("/cobros_por_alumno", name="app_Cobros_alumnoId", methods={"GET"})
+    */
     public function getCobrosByPersonaId(
         Request $request,
         ManagerRegistry $doctrine,
         ServiceCustomService $cs
     ): Response
     {
-        $personaId = $request->query->get('personaId');
+        $alumnoId = $request->query->get('alumnoId');
 
-        // dd($personaId);
         $em = $doctrine->getManager();
 
-        $cobros = $em->getRepository( Cobro::class )->findPagosByPersonaId($personaId);
+        $cobros = $em->getRepository( Cobro::class )->findBy(['alumno' => $alumnoId]);
 
         $objCobros = array();
         foreach($cobros as $cobro){
 
            array_push($objCobros, array(
             // utilizar el atributo concepto
-            "idTipoClase" => $cobro->getIdTipoClase(),  // tipo de clase es temporal, para que no rompa en el front
+            "concepto" => $cobro->getConcepto(), 
             "cantidad" => $cobro->getCantidad(), 
-            "fecha" => $cs->getFormattedDate($cobro->getFecha())));
+            "fecha" => $cs->getFormattedDate($cobro->getFecha())
+            ));
         }
         return $this->json($objCobros);
     }
 
-     /**
-     * @Route("/cobros", name="add_cobros", methods={"POST"})
-     */
-    public function addCobros(
+    /**
+     * @Route("/cobrosAlumno", name="add_cobrosAlumno", methods={"POST"})
+    */
+    public function addCobrosAlumno(
         Request $request, 
-        // ManagerRegistry $doctrine,
         ServiceCustomService $cs
-
-         ): Response
+        ): Response
     {
 
         $data = json_decode( $request->getContent());
-        $idPersona = $data->idPersona;
-        $cobros = $data->cobros;  // string [{idTipoClase:cantidad},{idTipoClase:cantidad}]
+        $idAlumno = $data->idAlumno;
+        $cobros = $data->cobros;
         $cobrosArray =  explode(',',$cobros);
         $fecha =  isset($data->fecha)? new DateTime($data->fecha) : null;
         
         foreach($cobrosArray as $cobros){
             $data = explode(':', $cobros );
-            $cs->registrarCobro($idPersona,$data[0], $data[1], $fecha);
+            $cs->registrarCobroAlumno($idAlumno,$data[0], $data[1], $fecha);
         }
     
         $resp = array(
             "rta"=> "ok",
-            "detail"=> "Registro de cobro exitoso."
+            "detail"=> "Registro de cobro al alumno exitoso."
         );
 
         return $this->json(($resp));

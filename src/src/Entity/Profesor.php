@@ -118,7 +118,7 @@ class Profesor
     {
         if (!$this->pagos->contains($pago)) {
             $this->pagos[] = $pago;
-            $pago->setProfesor($this);
+            // $pago->setProfesor($this);
         }
 
         return $this;

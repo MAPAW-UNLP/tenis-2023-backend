@@ -14,6 +14,7 @@ use App\Entity\Replicas;
 use App\Entity\Reserva;
 use App\Entity\Usuario;
 use App\Entity\Cobro;
+use App\Entity\Profesor;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Constraints\Date;
@@ -318,25 +319,53 @@ class CustomService
         return $disponible;
     }
 
-    public function registrarPago($idPersona, $idTipoClase, $cantidad, $fecha)
+    public function registrarPago($motivo, $cantidad, $fecha)
     {
 
         $pago = new Pagos();
-        $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $pago->setCantidad($cantidad);
+        $pago->setMotivo($motivo);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
         $this->em->persist($pago);
         $this->em->flush();
     }
-
-    public function registrarCobro($idPersona, $idTipoClase, $cantidad, $fecha)
+    
+    public function registrarPagoProfesor($idProfesor, $idTipoClase, $cantidad, $fecha)
     {
+        $profesor = $this->em->getRepository(Profesor::class)->find($idProfesor); 
 
-        $pago = new Cobro();
-        $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $pago = new Pagos();
+        $pago->setProfesor($profesor)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $profesor->addPago($pago);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
         $this->em->persist($pago);
+        $this->em->persist($profesor);
+        $this->em->flush();
+    }
+// hacer lo mismo que con el pago
+    // public function registrarCobro($idPersona, $idTipoClase, $cantidad, $fecha)
+    // {
+
+    //     $pago = new Cobro();
+    //     $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+    //     $fechaPago = isset($fecha) ? $fecha : new Date();
+    //     $pago->setFecha($fechaPago);
+    //     $this->em->persist($pago);
+    //     $this->em->flush();
+    // }
+
+    public function registrarCobroAlumno($idAlumno, $idTipoClase, $cantidad, $fecha)
+    {
+        $alumno = $this->em->getRepository(Profesor::class)->find($idAlumno); 
+
+        $cobro = new Cobro();
+        $cobro->setIdPersona($idAlumno)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $fechaCobro = isset($fecha) ? $fecha : new Date();
+        $cobro->setFecha($fechaCobro);
+        $this->em->persist($cobro);
+        $this->em->persist($alumno);
         $this->em->flush();
     }
 
