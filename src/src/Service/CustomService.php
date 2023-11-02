@@ -319,51 +319,57 @@ class CustomService
         return $disponible;
     }
 
-    public function registrarPago($motivo, $cantidad, $fecha)
+    public function registrarPago($motivo, $monto, $descripcion, $fecha)
     {
 
         $pago = new Pagos();
-        $pago->setCantidad($cantidad);
-        $pago->setMotivo($motivo);
+        $pago->setMonto($monto);
+        $pago->setMotivo($motivo)->setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
         $this->em->persist($pago);
         $this->em->flush();
     }
     
-    public function registrarPagoProfesor($idProfesor, $idTipoClase, $cantidad, $fecha)
+    public function registrarPagoProfesor($idProfesor, $idTipoClase, $descripcion, $motivo,$monto, $fecha)
     {
         $profesor = $this->em->getRepository(Profesor::class)->find($idProfesor); 
 
         $pago = new Pagos();
-        $pago->setProfesor($profesor)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
         $profesor->addPago($pago);
+        $pago->setProfesor($profesor)->setIdTipoClase($idTipoClase)->setMonto($monto);
+        
+        $pago->setMotivo($motivo);
+        $pago->setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
         $this->em->persist($pago);
         $this->em->persist($profesor);
         $this->em->flush();
     }
-// hacer lo mismo que con el pago
-    // public function registrarCobro($idPersona, $idTipoClase, $cantidad, $fecha)
-    // {
 
-    //     $pago = new Cobro();
-    //     $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
-    //     $fechaPago = isset($fecha) ? $fecha : new Date();
-    //     $pago->setFecha($fechaPago);
-    //     $this->em->persist($pago);
-    //     $this->em->flush();
-    // }
-
-    public function registrarCobroAlumno($idAlumno, $idTipoClase, $cantidad, $fecha)
+    public function registrarCobro($concepto, $monto, $descripcion,$fecha)
     {
-        $alumno = $this->em->getRepository(Profesor::class)->find($idAlumno); 
 
         $cobro = new Cobro();
-        $cobro->setIdPersona($idAlumno)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $cobro->setMonto($monto)->setConcepto($concepto)->setDescripcion($descripcion);
         $fechaCobro = isset($fecha) ? $fecha : new Date();
         $cobro->setFecha($fechaCobro);
+        $this->em->persist($cobro);
+        $this->em->flush();
+    }
+
+    public function registrarCobroAlumno($idAlumno, $idTipoClase, $concepto, $descripcion,$monto, $fecha)
+    {
+        $alumno = $this->em->getRepository(Alumno::class)->find($idAlumno); 
+
+        $cobro = new Cobro();
+        $alumno->addCobro($cobro);
+        $cobro->setAlumno($alumno)->setMonto($monto);
+        $fechaCobro = isset($fecha) ? $fecha : new Date();
+        $cobro->setFecha($fechaCobro);
+        $cobro->setConcepto($concepto);
+        $cobro->setDescripcion($descripcion);
         $this->em->persist($cobro);
         $this->em->persist($alumno);
         $this->em->flush();
@@ -500,4 +506,15 @@ class CustomService
     {
         return $this->em->getRepository(Reserva::class)->findReservasProfesor($profesorId);
     }
+
+    public function totalMontos($collection){
+        $total = 0;
+        foreach ($collection as $item) {
+            $total += $item->getMonto();
+        }
+        return $total;
+
+    }
+
+
 }

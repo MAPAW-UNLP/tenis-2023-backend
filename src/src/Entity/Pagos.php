@@ -28,9 +28,9 @@ class Pagos
     private $idTipoClase;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
-    private $cantidad;
+    private $monto;
 
     /**
      * @ORM\Column(type="date")
@@ -47,6 +47,16 @@ class Pagos
      * @ORM\JoinColumn(name="id", referencedColumnName="id", nullable=true)
      */
     private $profesor;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $descripcion;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $cantidad;
 
 
     public function getId(): ?int
@@ -78,14 +88,14 @@ class Pagos
         return $this;
     }
 
-    public function getCantidad(): ?int
+    public function getMonto(): ?int
     {
-        return $this->cantidad;
+        return $this->monto;
     }
 
-    public function setCantidad(int $cantidad): self
+    public function setMonto(int $monto): self
     {
-        $this->cantidad = $cantidad;
+        $this->monto = $monto;
 
         return $this;
     }
@@ -123,6 +133,30 @@ class Pagos
     public function setProfesor(?Profesor $profesor): self
     {
         $this->profesor = $profesor;
+
+        return $this;
+    }
+
+    public function getDescripcion(): ?string
+    {
+        return $this->descripcion;
+    }
+
+    public function setDescripcion(?string $descripcion): self
+    {
+        $this->descripcion = $descripcion;
+
+        return $this;
+    }
+
+    public function getCantidad(): ?int
+    {
+        return $this->cantidad;
+    }
+
+    public function setCantidad(?int $cantidad): self
+    {
+        $this->cantidad = $cantidad;
 
         return $this;
     }

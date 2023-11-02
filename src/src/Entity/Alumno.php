@@ -25,11 +25,6 @@ class Alumno
     private $nombre;
 
     /**
-     * @ORM\Column(type="string", length=50)
-     */
-    private $apellido;
-
-    /**
      * @ORM\Column(type="string", length=15)
      */
     private $telefono;
@@ -67,17 +62,6 @@ class Alumno
         return $this;
     }
 
-    public function getApellido(): ?string
-    {
-        return $this->apellido;
-    }
-
-    public function setApellido(string $apellido): self
-    {
-        $this->apellido = $apellido;
-
-        return $this;
-    }
 
     public function getTelefono(): ?string
     {
@@ -112,7 +96,7 @@ class Alumno
     {
         if (!$this->cobros->contains($cobro)) {
             $this->cobros[] = $cobro;
-            $cobro->setAlumno($this);
+            // $cobro->setAlumno($this);
         }
 
         return $this;

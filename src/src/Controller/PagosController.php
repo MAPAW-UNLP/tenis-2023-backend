@@ -41,11 +41,12 @@ class PagosController extends AbstractController
             array_push($objPagos, array(
                 'id' => $pago->getId(),
                 'idTipoClase' => $pago->getIdTipoClase() ? $pago->getIdTipoClase() : null,
-                'cantidad' => $pago->getCantidad(),
+                'monto' => $pago->getMonto(), // monto
                 'fecha' => $cs->getFormattedDate($pago->getFecha()),
                 'motivo' => $pago->getMotivo(),
                 'idProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getId() : null,
-                'nomProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getNombre() : null,
+                'nomProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getNombre() : "",
+                'descripcion' => $pago->getDescripcion() 
             ));
 
         }
@@ -57,7 +58,7 @@ class PagosController extends AbstractController
     /**
      * @Route("/pagos_por_profesor", name="app_Pagos_profesorId", methods={"GET"})
     */
-    public function getPagosByPersonaId(
+    public function getPagosByProfesorid(
         Request $request,
         ManagerRegistry $doctrine,
         ServiceCustomService $cs
@@ -78,11 +79,12 @@ class PagosController extends AbstractController
         foreach($pagos as $pago){
 
            array_push($objPagos, array(
-            "nomProfesor" => $pago->getProfesor() ? $pago->getProfesor()->getNombre() : null,
+            "nomProfesor" => $pago->getProfesor() ? $pago->getProfesor()->getNombre() : "",
             "idTipoClase" => $pago->getIdTipoClase(), 
-            "cantidad" => $pago->getCantidad(), 
+            "monto" => $pago->getMonto(), // = monto
             "fecha" => $cs->getFormattedDate($pago->getFecha()),
             "motivo" => $pago->getMotivo(),
+            'descripcion' => $pago->getDescripcion() 
             ));
         }
 
@@ -100,14 +102,15 @@ class PagosController extends AbstractController
     {
 
         $data = json_decode( $request->getContent());
+        $descripcion = $data->descripcion;
         $pagos = $data->pagos;
         $pagosArray =  explode(',',$pagos);
         $fecha =  isset($data->fecha)? new DateTime($data->fecha) : null;
         
         foreach($pagosArray as $pago){
             $data = explode(':', $pago );
-            //data[0] motivo, data[1] cantidad = monto
-            $cs->registrarPago($data[0], $data[1], $fecha);
+            //data[0] motivo, data[1]  = monto
+            $cs->registrarPago($data[0], $data[1], $descripcion,$fecha);
         }
     
         $resp = array(
@@ -129,13 +132,15 @@ class PagosController extends AbstractController
 
         $data = json_decode( $request->getContent());
         $idProfesor = $data->idProfesor;
+        $descripcion = $data->descripcion;
+        $motivo = $data->motivo;
         $pagos = $data->pagos; 
         $pagosArray =  explode(',',$pagos);
         $fecha =  isset($data->fecha)? new DateTime($data->fecha) : null;
         
         foreach($pagosArray as $pago){
             $data = explode(':', $pago );
-            $cs->registrarPagoProfesor($idProfesor,$data[0], $data[1], $fecha);
+            $cs->registrarPagoProfesor($idProfesor,$data[0],$descripcion ,$motivo,$data[1], $fecha);
         }
     
         $resp = array(

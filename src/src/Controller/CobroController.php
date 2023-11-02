@@ -48,14 +48,13 @@ class CobroController extends AbstractController
         foreach($cobros as $cobro){
 
            array_push($objCobros, array(
-            // utilizar el atributo concepto, ya no el id de tipodeclase            
-            "idAlumno" => $cobro->getAlumno()->getId(),
-            "nombreAlumno" => $cobro->getAlumno()->getNombre(),
-            "apellidoAlumno" => $cobro->getAlumno()->getApellido(),
-            "cantidad" => $cobro->getCantidad(), 
+            "idAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getId() : null,
+            "nombreAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getNombre() : "",
+            "apellidoAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getApellido() : "",
+            "monto" => $cobro->getMonto(), // monto
             "fecha" => $cs->getFormattedDate($cobro->getFecha()),
-            "concepto" => $cobro->getConcepto()
-
+            "concepto" => $cobro->getConcepto(),
+            "descripcion" => $cobro->getDescripcion() 
             ));
         }
         return $this->json($objCobros);
@@ -65,7 +64,7 @@ class CobroController extends AbstractController
     /**
      * @Route("/cobros_por_alumno", name="app_Cobros_alumnoId", methods={"GET"})
     */
-    public function getCobrosByPersonaId(
+    public function getCobrosByAlumnoId(
         Request $request,
         ManagerRegistry $doctrine,
         ServiceCustomService $cs
@@ -83,12 +82,43 @@ class CobroController extends AbstractController
            array_push($objCobros, array(
             // utilizar el atributo concepto
             "concepto" => $cobro->getConcepto(), 
-            "cantidad" => $cobro->getCantidad(), 
+            "monto" => $cobro->getMonto(), // = monto
+            'descripcion' => $cobro->getDescripcion(),
             "fecha" => $cs->getFormattedDate($cobro->getFecha())
             ));
         }
         return $this->json($objCobros);
     }
+
+     /**
+     * @Route("/cobros", name="add_cobros", methods={"POST"})
+     */
+    public function addCobros(
+        Request $request, 
+        ServiceCustomService $cs
+        ): Response
+    {
+
+        $data = json_decode( $request->getContent());
+        $descripcion = $data->descripcion;
+        $pagos = $data->pagos;
+        $pagosArray =  explode(',',$pagos);
+        $fecha =  isset($data->fecha)? new DateTime($data->fecha) : null;
+        
+        foreach($pagosArray as $pago){
+            $data = explode(':', $pago );
+            //data[0] motivo, data[1] = monto
+            $cs->registrarCobro($data[0], $data[1], $descripcion,$fecha);
+        }
+    
+        $resp = array(
+            "rta"=> "ok",
+            "detail"=> "Registro de crobo exitoso."
+        );
+
+        return $this->json(($resp));
+    }
+
 
     /**
      * @Route("/cobrosAlumno", name="add_cobrosAlumno", methods={"POST"})
@@ -102,12 +132,14 @@ class CobroController extends AbstractController
         $data = json_decode( $request->getContent());
         $idAlumno = $data->idAlumno;
         $cobros = $data->cobros;
+        $concepto = $data->concepto;
+        $descripcion = $data->descripcion;
         $cobrosArray =  explode(',',$cobros);
         $fecha =  isset($data->fecha)? new DateTime($data->fecha) : null;
         
         foreach($cobrosArray as $cobros){
             $data = explode(':', $cobros );
-            $cs->registrarCobroAlumno($idAlumno,$data[0], $data[1], $fecha);
+            $cs->registrarCobroAlumno($idAlumno,$data[0], $data[1], $concepto, $descripcion,$fecha);
         }
     
         $resp = array(

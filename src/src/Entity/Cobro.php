@@ -18,19 +18,19 @@ class Cobro
     private $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $idPersona;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $idTipoClase;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
-    private $cantidad;
+    private $monto;
 
     /**
      * @ORM\Column(type="date")
@@ -44,9 +44,14 @@ class Cobro
 
     /**
      * @ORM\ManyToOne(targetEntity="Alumno", inversedBy="cobro")
-     * @ORM\JoinColumn(name="id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="id", referencedColumnName="id", nullable=true)
      */
     private $alumno;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $descripcion;
 
 
     public function getId(): ?int
@@ -78,14 +83,14 @@ class Cobro
         return $this;
     }
 
-    public function getCantidad(): ?int
+    public function getMonto(): ?int
     {
-        return $this->cantidad;
+        return $this->monto;
     }
 
-    public function setCantidad(int $cantidad): self
+    public function setMonto(int $monto): self
     {
-        $this->cantidad = $cantidad;
+        $this->monto = $monto;
 
         return $this;
     }
@@ -122,6 +127,18 @@ class Cobro
     public function setAlumno(?Alumno $alumno): self
     {
         $this->alumno = $alumno;
+
+        return $this;
+    }
+
+    public function getDescripcion(): ?string
+    {
+        return $this->descripcion;
+    }
+
+    public function setDescripcion(?string $descripcion): self
+    {
+        $this->descripcion = $descripcion;
 
         return $this;
     }
