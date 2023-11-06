@@ -44,7 +44,7 @@ class Pagos
 
     /**
      * @ORM\ManyToOne(targetEntity="Profesor", inversedBy="pagos")
-     * @ORM\JoinColumn(name="id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="profesor_id", referencedColumnName="id", nullable=true)
      */
     private $profesor;
 

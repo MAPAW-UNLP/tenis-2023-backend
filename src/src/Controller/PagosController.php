@@ -37,16 +37,25 @@ class PagosController extends AbstractController
         $objPagos = array();
 
         foreach ($pagos as $pago) {
-
+            if ($pago -> getMotivo() === '1'){
+                $concepto_desc = 'Profesor';
+            }
+            elseif ($pago -> getMotivo() === '2'){
+                $concepto_desc = 'Proveedor';
+            }
+            else{
+                $concepto_desc = 'Varios';
+            }
             array_push($objPagos, array(
                 'id' => $pago->getId(),
-                'idTipoClase' => $pago->getIdTipoClase() ? $pago->getIdTipoClase() : null,
+                'idTipoClase' => $pago->getIdTipoClase() ? $pago -> getIdTipoClase() : null,
                 'monto' => $pago->getMonto(), // monto
                 'fecha' => $cs->getFormattedDate($pago->getFecha()),
-                'motivo' => $pago->getMotivo(),
+                'concepto_id' => $pago->getMotivo(),
+                'concepto_desc' => $concepto_desc,
                 'idProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getId() : null,
                 'nomProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getNombre() : "",
-                'descripcion' => $pago->getDescripcion() 
+                'descripcion' => $pago->getDescripcion()
             ));
 
         }
@@ -113,6 +122,32 @@ class PagosController extends AbstractController
             $cs->registrarPago($data[0], $data[1], $descripcion,$fecha);
         }
     
+        $resp = array(
+            "rta"=> "ok",
+            "detail"=> "Registro de pagos exitoso."
+        );
+
+        return $this->json(($resp));
+    }
+
+    /**
+     * @Route("/nuevo_pago", name="add_nuevo_pago", methods={"POST"})
+     */
+    public function addPago(
+        Request $request,
+        ServiceCustomService $cs
+    ): Response
+    {
+        // PAGO GENERICO SIN PROFESOR
+        $data = json_decode($request->getContent());
+        $descripcion = $data->descripcion;
+        $monto = $data -> monto;
+        $motivo = $data -> concepto;
+
+        $fecha =  isset($data->fecha) ? new DateTime($data -> fecha) : null;
+
+        $cs->registrarPago($motivo, $monto, $descripcion, $fecha);
+
         $resp = array(
             "rta"=> "ok",
             "detail"=> "Registro de pagos exitoso."

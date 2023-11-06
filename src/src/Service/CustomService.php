@@ -323,10 +323,12 @@ class CustomService
     {
 
         $pago = new Pagos();
-        $pago->setMonto($monto);
-        $pago->setMotivo($motivo)->setDescripcion($descripcion);
+        $pago -> setMonto($monto);
+        $pago -> setMotivo($motivo);
+        $pago -> setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
+
         $this->em->persist($pago);
         $this->em->flush();
     }

@@ -141,7 +141,7 @@ class CobroController extends AbstractController
         ServiceCustomService $cs
     ): Response
     {
-
+        // COBRO GENERICO SIN ALUMNO
         $data = json_decode( $request->getContent());
 
         $concepto = $data -> concepto;
