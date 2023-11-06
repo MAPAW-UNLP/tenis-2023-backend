@@ -50,14 +50,18 @@ class BalanzaController extends AbstractController
         // Calcula la suma de los montos de los cobros de los alumnos
         foreach ($alumnos as $alumno) {
             $cobros = $alumno->getCobros();
-            $totalCobros += $cs->totalMontos($cobros);
-    
+            if($cobros){
+                $totalCobros += $cs->totalMontos($cobros);
+            }
+
         }
 
         //Idem, pero con profesores
         foreach ($profesores as $profesor) {
             $pagos = $profesor->getPagos();
-            $totalPagos += $cs->totalMontos($pagos);
+            if($pagos){
+                $totalPagos += $cs->totalMontos($pagos);
+            }
         }
 
         $balanceGeneral = $totalCobros - $totalPagos;
@@ -72,6 +76,7 @@ class BalanzaController extends AbstractController
 
         return $response;
     }
+
 
 
 }
