@@ -43,8 +43,8 @@ class Cobro
     private $concepto;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Alumno", inversedBy="cobro")
-     * @ORM\JoinColumn(name="id", referencedColumnName="id", nullable=true)
+     * @ORM\ManyToOne(targetEntity="Alumno", inversedBy="cobros")
+     * @ORM\JoinColumn(name="alumno_id", referencedColumnName="id", nullable=true)
      */
     private $alumno;
 
