@@ -5,6 +5,7 @@ namespace App\Service;
 date_default_timezone_set('America/Buenos_Aires');
 
 use App\Entity\Alquiler;
+use App\Entity\Alumno;
 use App\Entity\Cancha;
 use App\Entity\Clases;
 use App\Entity\Grupo;
@@ -350,7 +351,7 @@ class CustomService
         $this->em->flush();
     }
 
-    public function registrarCobro($concepto, $monto, $descripcion,$fecha)
+    public function registrarCobro($concepto, $monto, $descripcion, $fecha)
     {
 
         $cobro = new Cobro();
@@ -372,6 +373,8 @@ class CustomService
         $cobro->setFecha($fechaCobro);
         $cobro->setConcepto($concepto);
         $cobro->setDescripcion($descripcion);
+        $cobro->setIdTipoClase($idTipoClase);
+
         $this->em->persist($cobro);
         $this->em->persist($alumno);
         $this->em->flush();

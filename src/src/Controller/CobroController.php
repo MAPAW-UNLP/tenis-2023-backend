@@ -138,6 +138,7 @@ class CobroController extends AbstractController
      */
     public function addCobro(
         Request $request,
+        ManagerRegistry $doctrine,
         ServiceCustomService $cs
     ): Response
     {
@@ -149,7 +150,13 @@ class CobroController extends AbstractController
         $descripcion = $data -> descripcion;
         $fecha =  isset($data -> fecha) ? new DateTime($data->fecha) : null;
 
-        $cs->registrarCobro($concepto, $monto, $descripcion,$fecha);
+        if (isset($data -> alumnoId)){
+            $idTipoClase = $data->idTipoClase ?? null;
+            $cs->registrarCobroAlumno($data -> alumnoId, $idTipoClase, $concepto, $descripcion, $monto, $fecha);
+        }
+        else {
+            $cs->registrarCobro($concepto, $monto, $descripcion, $fecha);
+        }
 
         $resp = array(
             "rta"=> "ok",
