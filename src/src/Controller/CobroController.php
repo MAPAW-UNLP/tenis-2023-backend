@@ -46,12 +46,23 @@ class CobroController extends AbstractController
 
         $objCobros = array();
         foreach($cobros as $cobro){
+            if ($cobro -> getConcepto() === '1'){
+               $concepto_desc = 'Alumno';
+            }
+            elseif ($cobro -> getConcepto() === '2'){
+                $concepto_desc = 'Alquiler';
+            }
+            else{
+                $concepto_desc = 'Varios';
+            }
            array_push($objCobros, array(
+            "id" => $cobro -> getId(),
             "idAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getId() : null,
             "nombreAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getNombre() : "",
             "monto" => $cobro->getMonto(), // monto
             "fecha" => $cs->getFormattedDate($cobro->getFecha()),
-            "concepto" => $cobro->getConcepto(),
+            "concepto_id" => $cobro->getConcepto(),
+            "concepto_desc" => $concepto_desc,
             "descripcion" => $cobro->getDescripcion()
             ));
         }
