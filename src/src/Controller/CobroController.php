@@ -74,18 +74,23 @@ class CobroController extends AbstractController
 
         $em = $doctrine->getManager();
 
-        $cobros = $em->getRepository( Cobro::class )->findBy(['alumno' => $alumnoId]);
+    //  Con el ID que recibimos por parametro consultamos por la entidad Alumno e iteramos directament en su coleccion
+        $alumno = $em->getRepository( Alumno::class )->findOneById($alumnoId);
+
+        $cobros = $alumno -> getCobros();
 
         $objCobros = array();
-        foreach($cobros as $cobro){
 
-           array_push($objCobros, array(
-            // utilizar el atributo concepto
-            "concepto" => $cobro->getConcepto(), 
-            "monto" => $cobro->getMonto(), // = monto
-            'descripcion' => $cobro->getDescripcion(),
-            "fecha" => $cs->getFormattedDate($cobro->getFecha())
-            ));
+        if ($cobros){
+            foreach($cobros as $cobro){
+               array_push($objCobros, array(
+                // utilizar el atributo concepto
+                "concepto" => $cobro->getConcepto(),
+                "monto" => $cobro->getMonto(), // = monto
+                'descripcion' => $cobro->getDescripcion(),
+                "fecha" => $cs->getFormattedDate($cobro->getFecha())
+                ));
+            }
         }
         return $this->json($objCobros);
     }
@@ -111,6 +116,32 @@ class CobroController extends AbstractController
             $cs->registrarCobro($data[0], $data[1], $descripcion,$fecha);
         }
     
+        $resp = array(
+            "rta"=> "ok",
+            "detail"=> "Registro de crobo exitoso."
+        );
+
+        return $this->json(($resp));
+    }
+
+    /**
+     * @Route("/nuevo_cobro", name="add_nuevo_cobro", methods={"POST"})
+     */
+    public function addCobro(
+        Request $request,
+        ServiceCustomService $cs
+    ): Response
+    {
+
+        $data = json_decode( $request->getContent());
+
+        $concepto = $data -> concepto;
+        $monto = $data -> monto;
+        $descripcion = $data -> descripcion;
+        $fecha =  isset($data -> fecha) ? new DateTime($data->fecha) : null;
+
+        $cs->registrarCobro($concepto, $monto, $descripcion,$fecha);
+
         $resp = array(
             "rta"=> "ok",
             "detail"=> "Registro de crobo exitoso."

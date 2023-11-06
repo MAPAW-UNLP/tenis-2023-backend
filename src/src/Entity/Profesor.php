@@ -95,7 +95,7 @@ class Profesor
         return $this;
     }
 
-
+    /** @Ignore() */
     public function getUsuario(): ?Usuario
     {
         return $this->usuario;

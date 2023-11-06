@@ -121,7 +121,7 @@ class PersonaController extends AbstractController
     }
 
     /**
-     * @Route("/alumnos", name="app_alumnos", methods={"GET"})
+     * @Route("/persona/alumnos", name="app_alumnos", methods={"GET"})
      */
     public function getAlumnos(
         ServiceCustomService $cs

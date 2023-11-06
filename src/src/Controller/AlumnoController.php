@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Alumno;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,14 +16,13 @@ use Doctrine\ORM\EntityManagerInterface;
 /**
  * @Route(path="/api")
 */
-
 class AlumnoController extends AbstractController
 {
     
     /**
-     * @Route("/alumnos", name="app_alumnos", methods={"GET"})
+     * @Route("/alumnos", name="app_get_alumnos", methods={"GET"})
     */
-    public function getAlumnos(): Response 
+    public function getAlumnos(): Response
     {   
         $alumnos = $this->getDoctrine()->getRepository( Alumno::class )->findAll();
 
@@ -30,17 +30,17 @@ class AlumnoController extends AbstractController
     }
 
     /**
-     * @Route("/alumno", name="app_alumnos", methods={"GET"})
+     * @Route("/alumno", name="app_get_alumno", methods={"GET"})
     */
     public function getAlumno(Request $request, ManagerRegistry $doctrine): Response
     {
-        $alumnosId = $request->query->get('alumnosId');
+        $alumnosId = $request->query->get('alumnoId');
         $em = $doctrine->getManager();
         $alumno = $em->getRepository( Alumno::class )->findOneById($alumnosId);
         return $this->json($alumno);
     }
 
-    
+
     /**
      * @Route("/alumno", name="app_alta_alumno", methods={"POST"})
     */
@@ -50,12 +50,12 @@ class AlumnoController extends AbstractController
 
         $data = json_decode( $request->getContent());
         $nombre = $data->nombre;
-
         $telefono = $data->telefono;
+        $fecha_nac = isset($data->fechaNac) &&  strlen($data->fechaNac) > 0 ? new DateTime($data->fechaNac): null;
 
         $alumno = new Alumno();
         $alumno->setNombre($nombre)->setTelefono($telefono);
-        
+        $alumno -> setFechaNac($fecha_nac);
 
         $em = $doctrine->getManager();
         $em->persist($alumno);

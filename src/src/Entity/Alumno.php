@@ -6,6 +6,7 @@ use App\Repository\AlumnoRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 /**
  * @ORM\Entity(repositoryClass=AlumnoRepository::class)
@@ -37,6 +38,7 @@ class Alumno
     /**
      * @ORM\OneToMany(targetEntity="Cobro", mappedBy="alumno")
     */
+    /** @Ignore() */
     private $cobros;
 
     public function __construct()
@@ -87,7 +89,8 @@ class Alumno
         return $this;
     }
 
-    public function getCobros(): Collection
+    /** @Ignore() */
+    public function getCobros(): ?Collection
     {
         return $this->cobros;
     }
