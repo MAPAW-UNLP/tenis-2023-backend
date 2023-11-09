@@ -97,7 +97,8 @@ class Alumno
 
     public function addCobro(Cobro $cobro): self
     {
-        if (!$this->cobros->contains($cobro)) {
+//        if (!$this->cobros->contains($cobro)) {
+        if (!$this->getCobros()->contains($cobro)) {
             $this->cobros[] = $cobro;
             // $cobro->setAlumno($this);
         }

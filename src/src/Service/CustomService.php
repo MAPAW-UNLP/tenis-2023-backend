@@ -367,13 +367,13 @@ class CustomService
         $alumno = $this->em->getRepository(Alumno::class)->find($idAlumno); 
 
         $cobro = new Cobro();
-        $alumno->addCobro($cobro);
+//        $alumno->addCobro($cobro);
         $cobro->setAlumno($alumno)->setMonto($monto);
         $fechaCobro = isset($fecha) ? $fecha : new Date();
         $cobro->setFecha($fechaCobro);
         $cobro->setConcepto($concepto);
         $cobro->setDescripcion($descripcion);
-        $cobro->setIdTipoClase($idTipoClase);
+//        $cobro->setIdTipoClase($idTipoClase);
 
         $this->em->persist($cobro);
         $this->em->persist($alumno);
