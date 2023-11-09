@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityRepository;
 use App\Entity\Profesor;
 use App\Entity\Alumno;
 use App\Entity\Cobro;
@@ -129,4 +131,156 @@ class BalanzaController extends AbstractController
 
         return new JsonResponse($arrResult);
     }
+
+    /**
+     * @Route("/balance-en-fecha", name="app_balance_fecha", methods={"GET"})
+     */
+    public function getBalanceEnFecha(Request $request, ManagerRegistry $doctrine, ServiceCustomService $cs): Response {
+
+        $fechaDesde = $request->query->get('fecha_inicio');
+        $fechaHasta = $request->query->get('fecha_fin');
+        $descripcion = $request->query->get('descripcion');
+
+        $em = $doctrine->getManager();
+        
+        $totalPagos = 0;
+        $dataPagos = [];
+        $dataCobros = [];
+        $totalCobros = 0;
+        
+        // MODULARIZAR LA QUERY
+        if(empty ($descripcion)){
+            $query = $em->createQuery(
+                "SELECT c 
+                FROM App\Entity\Cobro c 
+                WHERE c.fecha 
+                BETWEEN :desde AND :hasta");
+            $query->setParameter('desde', $fechaDesde);
+            $query->setParameter('hasta', $fechaHasta);         
+        
+            $resultadoCobros = $query->getResult();
+            
+            $query = $em->createQuery(
+                "SELECT p 
+                FROM App\Entity\Pagos p 
+                WHERE p.fecha 
+                BETWEEN :desde AND :hasta");
+            $query->setParameter('desde', $fechaDesde);
+            $query->setParameter('hasta', $fechaHasta);       
+        
+            $resultadoPagos = $query->getResult();
+
+        }else{
+
+            // Filtra de cobros por descripcion y fecha
+            $query = $em->createQuery(
+                "SELECT c 
+                FROM App\Entity\Cobro c 
+                WHERE c.descripcion 
+                LIKE :desc AND (c.fecha BETWEEN :desde AND :hasta)");
+            $query->setParameter('desde', $fechaDesde);
+            $query->setParameter('hasta', $fechaHasta);
+            $query->setParameter('desc', '%' . $descripcion . '%'); // cualquier string que contenga $descripcion en algún lugar
+
+            $resultadoCobros = $query->getResult();
+            
+            // Filtrado de pagos con descripcion
+            $query = $em->createQuery(
+                "SELECT p 
+                FROM App\Entity\Pagos p 
+                WHERE p.descripcion 
+                LIKE :desc AND (p.fecha BETWEEN :desde AND :hasta)");
+            $query->setParameter('desde', $fechaDesde);
+            $query->setParameter('hasta', $fechaHasta);
+            $query->setParameter('desc', '%' . $descripcion . '%');
+            
+            $resultadoPagos = $query->getResult();
+        }
+        
+        if($resultadoCobros){
+
+            foreach ($resultadoCobros as $cobro) {
+                $cobrosA = $resultadoCobros->getAlumno()->getCobros();
+                if($cobrosA){
+                    $totalCobros += $cs->totalMontos($cobrosA);
+                }
+                $dataCobros[] = [
+                    'Dia' => $cobro->getFecha(),
+                    'Concepto' => $cobro->getConcepto(),
+                    'Descripcion' => $cobro->getDescripcion() ? $cobro->getDescripcion() : null,
+                    'Debe' => $cobro->getMonto(),
+                ];
+            }
+        }
+
+        if($resultadoPagos) {
+                
+            foreach ($resultadoPagos as $pagos) {
+                $PagosP = $resultadoPagos->getProfesor()->getPagos();
+                if($PagosP){
+                    $totalPagos += $cs->totalMontos($PagosP);
+                }
+                $dataPagos[] = [
+                    'Dia' => $pagos->getFecha(),
+                    'Concepto' => $pagos->getMotivo(),
+                    'Descripcion' => $pagos->getDescripcion() ? $pagos->getDescripcion() : null,
+                    'Haber' => $pagos->getMonto(),
+                ];
+            }
+    
+        }
+
+        $balanceGeneral = $totalCobros - $totalPagos;
+
+        $responseData = [
+            'cobros' => $dataCobros,
+            'pagos' => $dataPagos,
+            'total' => $balanceGeneral
+        ];
+
+        $response = new JsonResponse($responseData);
+
+        return $response;
+    }
+
+
+    // private function obtenerDatos($em, $entidad, $campo, $fechaDesde, $fechaHasta, $descripcion, $cs){
+
+    //     $total = 0;
+    //     $data = [];
+
+    //     $query = $em->createQuery(
+    //         "SELECT e 
+    //         FROM App\Entity\\$entidad e 
+    //         WHERE e.$campo LIKE :desc AND (e.fecha BETWEEN :desde AND :hasta)"
+    //     );
+
+    //     $query->setParameter('desde', $fechaDesde);
+    //     $query->setParameter('hasta', $fechaHasta);
+    //     $query->setParameter('desc', '%' . $descripcion . '%'); // cualquier string que contenga $descripcion en algún lugar
+
+    //     $resultados = $query->getResult();
+    
+    //     if ($resultados) {
+    //         foreach ($resultados as $resultado) {
+    //             $entidadRelacionada = $resultados->getAlumno()->getCobros();
+    //             if ($entidadRelacionada) {
+    //                 $total += $cs->totalMontos($entidadRelacionada);
+    //             }
+    
+    //             $data[] = [
+    //                 'Dia' => $resultado->getFecha(),
+    //                 'Concepto' => $resultado->getConcepto(),
+    //                 'Descripcion' => $resultado->getDescripcion(),
+    //                 $entidad === 'Cobro' ? 'Debe' : 'Haber' => $resultado->getMonto(),
+    //             ];
+    //         }
+    //     }
+
+
+
+
+    // }
+
+
 }

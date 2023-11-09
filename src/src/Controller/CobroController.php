@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Service\CustomService as ServiceCustomService;
 use DateTime;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
 
     /**
      * @Route(path="/api")
@@ -84,25 +84,76 @@ class CobroController extends AbstractController
 
         $em = $doctrine->getManager();
 
-    //  Con el ID que recibimos por parametro consultamos por la entidad Alumno e iteramos directament en su coleccion
-        $alumno = $em->getRepository( Alumno::class )->findOneById($alumnoId);
+    // //  Con el ID que recibimos por parametro consultamos por la entidad Alumno e iteramos directament en su coleccion
+    //     $alumno = $em->getRepository( Alumno::class )->findOneById($alumnoId);
 
-        $cobros = $alumno -> getCobros();
+    //     $cobros = $alumno -> getCobros();
 
-        $objCobros = array();
+    //     $objCobros = array();
 
-        if ($cobros){
-            foreach($cobros as $cobro){
-               array_push($objCobros, array(
-                // utilizar el atributo concepto
+    //     if ($cobros){
+    //         foreach($cobros as $cobro){
+    //            array_push($objCobros, array(
+    //             // utilizar el atributo concepto
+    //             "concepto" => $cobro->getConcepto(),
+    //             "monto" => $cobro->getMonto(), // = monto
+    //             'descripcion' => $cobro->getDescripcion(),
+    //             "fecha" => $cs->getFormattedDate($cobro->getFecha())
+    //             ));
+    //         }
+    //     }
+    //     return $this->json($objCobros);
+    
+
+        $cobros = $em->getRepository( Cobro::class )->findAll();
+        $objCobros = [];
+        $cobroRepository = $em->getRepository('App\Entity\Cobro');
+
+        // ------------------- SOLUCION 1 --------------------------
+
+        $cobros = $cobroRepository->createQueryBuilder('c')
+        ->where('c.alumno = :alumnoId')
+        ->setParameter('alumnoId', $alumnoId)
+        ->getQuery()
+        ->getResult();
+
+        
+        foreach($cobros as $cobro){
+            $objCobros[] = [
                 "concepto" => $cobro->getConcepto(),
-                "monto" => $cobro->getMonto(), // = monto
-                'descripcion' => $cobro->getDescripcion(),
-                "fecha" => $cs->getFormattedDate($cobro->getFecha())
-                ));
-            }
+                "monto" => $cobro->getMonto(),
+                "descripcion" => $cobro->getDescripcion(),
+                "fecha" => $cs->getFormattedDate($cobro->getFecha())        
+            ];
+        
         }
-        return $this->json($objCobros);
+
+
+        // ------------------- SOLUCION 2 --------------------------
+
+        // $todosLosCobros = $cobroRepository->findAll();
+        // $objCobros = [];
+        // foreach ($todosLosCobros as $cobro) {
+        //     // Verifica si el id del alumno matchea
+        //     if ($cobro->getAlumno()->getId() === $alumnoId) {
+                
+        //         if ($cobro->getAlumno()->getCobros()){ // si existen cobros para ese alumno
+        //             $cobrosDeAlu = $cobro->getAlumno()->getCobros();
+        //             foreach ($cobrosDeAlu as $ca ) {
+        //                 $objCobros[] = [
+        //                     "concepto" => $ca->getConcepto(),
+        //                     "monto" => $ca->getMonto(),
+        //                     "descripcion" => $ca->getDescripcion(),
+        //                     "fecha" => $cs->getFormattedDate($ca->getFecha())     
+        //                 ];
+        //             }
+
+        //         }
+        //     }
+        // }
+
+        return new JsonResponse($objCobros);
+
     }
 
     /**
