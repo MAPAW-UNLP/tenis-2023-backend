@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Alumno;
+use App\Entity\Clases;
 use App\Entity\Cobro;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -99,6 +100,47 @@ class CobroController extends AbstractController
                 'descripcion' => $cobro->getDescripcion(),
                 "fecha" => $cs->getFormattedDate($cobro->getFecha())
                 ));
+            }
+        }
+        return $this->json($objCobros);
+    }
+
+    /**
+     * @Route("/cobros_por_alumno_v2", name="app_cbros_por_alumno_v2", methods={"GET"})
+     */
+    public function getCobrosByAlumnoV2(
+        Request $request,
+        ManagerRegistry $doctrine,
+        ServiceCustomService $cs
+    ): Response
+    {
+        $alumnoId = $request->query->get('alumnoId');
+        $em = $doctrine->getManager();
+
+        //  Con el ID que recibimos por parametro consultamos por la entidad Alumno e iteramos directament en su coleccion
+        $cobros = $em->getRepository( Cobro::class )->findBy(
+            ['alumno' => strval($alumnoId)],
+            ['fecha' => 'DESC']
+        );
+
+        $objCobros = array();
+
+        if ($cobros){
+            foreach($cobros as $cobro){
+                $tipoClase = null;
+                if($cobro->getIdTipoClase() !== null){
+                    $tipoClase = $em->getRepository(Clases::class)->find($cobro->getIdTipoClase());
+                }
+                $objCobros[] = array(
+                    // utilizar el atributo concepto
+                    "id" => $cobro->getId(),
+                    "concepto" => $cobro->getConcepto(),
+                    "monto" => $cobro->getMonto(), // = monto
+                    'descripcion' => $cobro->getDescripcion(),
+                    "fecha" => $cs->getFormattedDate($cobro->getFecha()),
+                    "idTipoClase" => $cobro->getIdTipoClase(),
+                    "tipoClase" => $tipoClase !== null ? ucfirst(strtolower($tipoClase->getTipo())) : null
+                );
             }
         }
         return $this->json($objCobros);
