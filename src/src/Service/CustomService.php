@@ -334,13 +334,13 @@ class CustomService
         $this->em->flush();
     }
     
-    public function registrarPagoProfesor($idProfesor, $idTipoClase, $descripcion, $motivo,$monto, $fecha)
+    public function registrarPagoProfesor($idProfesor, $descripcion, $motivo, $monto, $fecha)
     {
         $profesor = $this->em->getRepository(Profesor::class)->find($idProfesor); 
 
         $pago = new Pagos();
         $profesor->addPago($pago);
-        $pago->setProfesor($profesor)->setIdTipoClase($idTipoClase)->setMonto($monto);
+        $pago->setProfesor($profesor)->setMonto($monto);
         
         $pago->setMotivo($motivo);
         $pago->setDescripcion($descripcion);
@@ -373,7 +373,7 @@ class CustomService
         $cobro->setFecha($fechaCobro);
         $cobro->setConcepto($concepto);
         $cobro->setDescripcion($descripcion);
-//        $cobro->setIdTipoClase($idTipoClase);
+        $cobro->setIdTipoClase($idTipoClase);
 
         $this->em->persist($cobro);
         $this->em->persist($alumno);

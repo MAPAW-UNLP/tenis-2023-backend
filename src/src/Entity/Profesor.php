@@ -108,7 +108,7 @@ class Profesor
         return $this;
     }
 
-
+    /** @Ignore() */
     public function getPagos(): Collection
     {
         return $this->pagos;

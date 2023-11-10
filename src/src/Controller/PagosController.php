@@ -140,13 +140,19 @@ class PagosController extends AbstractController
     {
         // PAGO GENERICO SIN PROFESOR
         $data = json_decode($request->getContent());
+
         $descripcion = $data->descripcion;
         $monto = $data -> monto;
         $motivo = $data -> concepto;
 
         $fecha =  isset($data->fecha) ? new DateTime($data -> fecha) : null;
 
-        $cs->registrarPago($motivo, $monto, $descripcion, $fecha);
+        if (isset($data->profesorId)){
+            $cs->registrarPagoProfesor($data->profesorId, $descripcion, $motivo, $monto, $fecha);
+        }
+        else{
+            $cs->registrarPago($motivo, $monto, $descripcion, $fecha);
+        }
 
         $resp = array(
             "rta"=> "ok",
