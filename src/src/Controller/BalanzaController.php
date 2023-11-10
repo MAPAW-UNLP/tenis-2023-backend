@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\CustomService as ServiceCustomService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -147,7 +148,7 @@ class BalanzaController extends AbstractController
         $dataPagos = [];
         $dataCobros = [];
         $totalCobros = 0;
-        
+
         // MODULARIZAR LA QUERY
         if(empty ($descripcion)){
             $query = $em->createQuery(
@@ -196,51 +197,59 @@ class BalanzaController extends AbstractController
             
             $resultadoPagos = $query->getResult();
         }
-        
-        if($resultadoCobros){
 
+        // NO USAR METODOS OBTENIDOS DE CLASES HIJAS PORQUE NO FUNCIONA
+        if($resultadoCobros){
             foreach ($resultadoCobros as $cobro) {
-                $cobrosA = $resultadoCobros->getAlumno()->getCobros();
-                if($cobrosA){
-                    $totalCobros += $cs->totalMontos($cobrosA);
-                }
+                $totalCobros += $cobro->getMonto();
                 $dataCobros[] = [
-                    'Dia' => $cobro->getFecha(),
-                    'Concepto' => $cobro->getConcepto(),
-                    'Descripcion' => $cobro->getDescripcion() ? $cobro->getDescripcion() : null,
-                    'Debe' => $cobro->getMonto(),
+                    'id' => $cobro->getId(),
+                    'fecha' => $cs->getFormattedDate($cobro->getFecha()),
+                    'concepto' => $cobro->getConcepto(),
+                    'concepto_desc' => intval($cobro->getConcepto()) === 1 ? 'Alumno' :
+                        (intval($cobro->getConcepto()) === 2 ? 'Alquiler' : 'Varios'),
+                    'descripcion' => $cobro->getDescripcion() ? $cobro->getDescripcion() : null,
+                    'monto' => $cobro->getMonto(),
+                    'movimiento_id' => 1 // Cobro
                 ];
             }
         }
 
         if($resultadoPagos) {
-                
             foreach ($resultadoPagos as $pagos) {
-                $PagosP = $resultadoPagos->getProfesor()->getPagos();
-                if($PagosP){
-                    $totalPagos += $cs->totalMontos($PagosP);
-                }
+                $totalPagos += $pagos->getMonto();
                 $dataPagos[] = [
-                    'Dia' => $pagos->getFecha(),
-                    'Concepto' => $pagos->getMotivo(),
-                    'Descripcion' => $pagos->getDescripcion() ? $pagos->getDescripcion() : null,
-                    'Haber' => $pagos->getMonto(),
+                    'id' => $pagos->getId(),
+                    'fecha' => $cs->getFormattedDate($pagos->getFecha()),
+                    'concepto' => $pagos->getMotivo(),
+                    'concepto_desc' => intval($pagos->getMotivo()) === 1 ? 'Profesor' :
+                        (intval($pagos->getMotivo()) === 2 ? 'Proveedor' : 'Varios'),
+                    'descripcion' => $pagos->getDescripcion() ? $pagos->getDescripcion() : null,
+                    'monto' => $pagos->getMonto(),
+                    'movimiento_id' => 2 // Pago
                 ];
             }
-    
+
         }
 
         $balanceGeneral = $totalCobros - $totalPagos;
 
+        // Con las dos colecciones procedemos a mergearlas en una sola ordenando los elementos por fecha
+        $merged = new ArrayCollection(
+            array_merge($dataCobros, $dataPagos)
+        );
+        $iterator = $merged->getIterator();
+        $iterator->uasort(function($a, $b){
+            return ($a['fecha'] > $b['fecha']) ? -1 : 1;
+        });
+
+        $merged_result = iterator_to_array($iterator, false);
         $responseData = [
-            'cobros' => $dataCobros,
-            'pagos' => $dataPagos,
+            'movimientos' => $merged_result,
             'total' => $balanceGeneral
         ];
 
-        $response = new JsonResponse($responseData);
-
-        return $response;
+        return new JsonResponse($responseData);
     }
 
 
