@@ -123,7 +123,7 @@ class PeriodoAusenciaController extends AbstractController
                 $periodoAusenciaRepository->edit($periodoAusencia[0], true);
                 return $this->json([
                     'message' => 'Se ha aprobado el pedido de ausencia.',
-                    'data' => $periodoAusencia,
+                    'data' => ['periodoAusencia' => $periodoAusencia[0], 'reservas' => $reservas]
                 ], 200);
             } else {
                 return $this->json([
@@ -135,6 +135,29 @@ class PeriodoAusenciaController extends AbstractController
             return $this->json([
                 'message' => 'No existe el pedido de ausencia.',
                 'data' => $periodoAusencia,
+            ], 404);
+        }
+    }
+
+    /**
+     * @Route("/show-class-between-dates", name="app_show_class_between_dates", methods={"GET"})
+     */
+    public function showClassBetweenDates(Request $request, ReservaRepository $reservaRepository): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        $fecha_ini = new \DateTime($data['fecha_ini']);
+        $fecha_fin = new \DateTime($data['fecha_fin']);
+        $reservas = $reservaRepository->findReservasBetweenDates($fecha_ini, $fecha_fin);
+
+        if ($reservas) {
+            return $this->json([
+                'message' => 'Se han encontrado reservas.',
+                'data' => $reservas,
+            ], 200);
+        } else {
+            return $this->json([
+                'message' => 'No se han encontrado reservas para las fechas indicadas.',
+                'data' => $reservas,
             ], 404);
         }
     }
