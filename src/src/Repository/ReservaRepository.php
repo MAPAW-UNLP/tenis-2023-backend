@@ -154,6 +154,36 @@ class ReservaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Reserva[] Returns an array of Reserva objects
+     */
+    public function findThreeClassBefore($fecha): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.fecha < :val1')
+            ->setParameter('val1', $fecha)
+            ->andWhere('u.estado_id = 0')
+            ->orderBy('u.fecha', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Reserva[] Returns an array of Reserva objects
+     */
+    public function findThreeClassAfter($fecha): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.fecha > :val1')
+            ->setParameter('val1', $fecha)
+            ->andWhere('u.estado_id = 0')
+            ->orderBy('u.fecha', 'ASC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+    }
+
 
     /* public function changeEstadoReserva($id, $estado_id): void
     {

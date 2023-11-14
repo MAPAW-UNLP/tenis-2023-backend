@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use DateInterval;
 
 /**
  * @Route(path="/api")
@@ -52,9 +53,16 @@ class SuspensionClaseController extends AbstractController
             }
         } else {
             // Retornar rango de posibles horarios de reserva.
+            $fecha = new \DateTime($data['fecha']);
+            // $fecha_ini = clone $fecha;
+            // $fecha_ini->modify('-15 days');
+            // $fecha_fin = clone $fecha;
+            // $fecha_fin->modify('+15 days');
+            $clasesAnteriores = $reservaRepository->findThreeClassBefore($fecha);
+            $clasesPosteriores = $reservaRepository->findThreeClassAfter($fecha);
             return $this->json([
-                'message' => 'No existe una reserva para el horario ingresado.',
-                'data' => $data,
+                'message' => 'No existe una reserva para el día y horario ingresado. Quizas quiso mencionar algunas de estas clases:',
+                'data' => ['data' => $data, 'clasesAnteriores' => $clasesAnteriores, 'clasesPosteriores' => $clasesPosteriores],
             ], 404);
         }
     }

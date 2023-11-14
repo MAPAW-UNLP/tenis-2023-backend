@@ -140,9 +140,9 @@ class PeriodoAusenciaController extends AbstractController
     }
 
     /**
-     * @Route("/show-class-between-dates", name="app_show_class_between_dates", methods={"GET"})
+     * @Route("/mostrar-clases-entre-fechas", name="app_show_class_between_dates", methods={"GET"})
      */
-    public function showClassBetweenDates(Request $request, ReservaRepository $reservaRepository): Response
+    public function showClasesEntreFechas(Request $request, ReservaRepository $reservaRepository): Response
     {
         $data = json_decode($request->getContent(), true);
         $fecha_ini = new \DateTime($data['fecha_ini']);
