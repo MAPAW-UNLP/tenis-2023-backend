@@ -210,6 +210,7 @@ class BalanzaController extends AbstractController
                         (intval($cobro->getConcepto()) === 2 ? 'Alquiler' : 'Varios'),
                     'descripcion' => $cobro->getDescripcion() ? $cobro->getDescripcion() : null,
                     'monto' => $cobro->getMonto(),
+                    'nombre' => $cobro->getAlumno() ? $cobro->getAlumno()->getNombre() : "",
                     'movimiento_id' => 1 // Cobro
                 ];
             }
@@ -226,6 +227,7 @@ class BalanzaController extends AbstractController
                         (intval($pagos->getMotivo()) === 2 ? 'Proveedor' : 'Varios'),
                     'descripcion' => $pagos->getDescripcion() ? $pagos->getDescripcion() : null,
                     'monto' => $pagos->getMonto(),
+                    'nombre' => $pagos->getProfesor() ? $pagos->getProfesor()->getNombre() : "",
                     'movimiento_id' => 2 // Pago
                 ];
             }
