@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\ProfesorRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Ignore;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=ProfesorRepository::class)
@@ -40,6 +42,17 @@ class Profesor
      */
 
      private $usuario;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Pagos", mappedBy="profesor")
+    */
+    private $pagos;
+
+    public function __construct()
+    {
+        $this->pagos = new ArrayCollection();
+    }
+
     
     public function getId(): ?int
     {
@@ -91,6 +104,22 @@ class Profesor
     public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
+
+        return $this;
+    }
+
+    /** @Ignore() */
+    public function getPagos(): Collection
+    {
+        return $this->pagos;
+    }
+
+    public function addPago(Pagos $pago): self
+    {
+        if (!$this->pagos->contains($pago)) {
+            $this->pagos[] = $pago;
+            // $pago->setProfesor($this);
+        }
 
         return $this;
     }

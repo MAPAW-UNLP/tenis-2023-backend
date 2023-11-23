@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\PagosRepository;
+use App\Repository\CobroRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=PagosRepository::class)
+ * @ORM\Entity(repositoryClass=CobroRepository::class)
  */
-class Pagos
+class Cobro
 {
     /**
      * @ORM\Id
@@ -40,23 +40,18 @@ class Pagos
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $motivo;
+    private $concepto;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Profesor", inversedBy="pagos")
-     * @ORM\JoinColumn(name="profesor_id", referencedColumnName="id", nullable=true)
+     * @ORM\ManyToOne(targetEntity="Alumno", inversedBy="cobros")
+     * @ORM\JoinColumn(name="alumno_id", referencedColumnName="id", nullable=true)
      */
-    private $profesor;
+    private $alumno;
 
     /**
      * @ORM\Column(type="string", length=100, nullable=true)
      */
     private $descripcion;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $cantidad;
 
 
     public function getId(): ?int
@@ -112,27 +107,26 @@ class Pagos
         return $this;
     }
 
-    public function getMotivo(): ?string
+    public function getConcepto(): ?string
     {
-        return $this->motivo;
+        return $this->concepto;
     }
 
-    public function setMotivo(string $motivo): self
+    public function setConcepto(string $concepto): self
     {
-        $this->motivo = $motivo;
+        $this->concepto = $concepto;
 
         return $this;
     }
 
-
-    public function getProfesor(): ?Profesor
+    public function getAlumno(): ?Alumno
     {
-        return $this->profesor;
+        return $this->alumno;
     }
 
-    public function setProfesor(?Profesor $profesor): self
+    public function setAlumno(?Alumno $alumno): self
     {
-        $this->profesor = $profesor;
+        $this->alumno = $alumno;
 
         return $this;
     }
@@ -148,18 +142,4 @@ class Pagos
 
         return $this;
     }
-
-    public function getCantidad(): ?int
-    {
-        return $this->cantidad;
-    }
-
-    public function setCantidad(?int $cantidad): self
-    {
-        $this->cantidad = $cantidad;
-
-        return $this;
-    }
-
-
 }

@@ -5,6 +5,7 @@ namespace App\Service;
 date_default_timezone_set('America/Buenos_Aires');
 
 use App\Entity\Alquiler;
+use App\Entity\Alumno;
 use App\Entity\Cancha;
 use App\Entity\Clases;
 use App\Entity\Grupo;
@@ -13,6 +14,8 @@ use App\Entity\Persona;
 use App\Entity\Replicas;
 use App\Entity\Reserva;
 use App\Entity\Usuario;
+use App\Entity\Cobro;
+use App\Entity\Profesor;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Constraints\Date;
@@ -317,17 +320,65 @@ class CustomService
         return $disponible;
     }
 
-    public function registrarPago($idPersona, $idTipoClase, $cantidad, $fecha)
+    public function registrarPago($motivo, $monto, $descripcion, $fecha)
     {
 
         $pago = new Pagos();
-        $pago->setIdPersona($idPersona)->setIdTipoClase($idTipoClase)->setCantidad($cantidad);
+        $pago -> setMonto($monto);
+        $pago -> setMotivo($motivo);
+        $pago -> setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
+
         $this->em->persist($pago);
         $this->em->flush();
     }
+    
+    public function registrarPagoProfesor($idProfesor, $descripcion, $motivo, $monto, $fecha)
+    {
+        $profesor = $this->em->getRepository(Profesor::class)->find($idProfesor); 
 
+        $pago = new Pagos();
+        $profesor->addPago($pago);
+        $pago->setProfesor($profesor)->setMonto($monto);
+        
+        $pago->setMotivo($motivo);
+        $pago->setDescripcion($descripcion);
+        $fechaPago = isset($fecha) ? $fecha : new Date();
+        $pago->setFecha($fechaPago);
+        $this->em->persist($pago);
+        $this->em->persist($profesor);
+        $this->em->flush();
+    }
+
+    public function registrarCobro($concepto, $monto, $descripcion, $fecha)
+    {
+
+        $cobro = new Cobro();
+        $cobro->setMonto($monto)->setConcepto($concepto)->setDescripcion($descripcion);
+        $fechaCobro = isset($fecha) ? $fecha : new Date();
+        $cobro->setFecha($fechaCobro);
+        $this->em->persist($cobro);
+        $this->em->flush();
+    }
+
+    public function registrarCobroAlumno($idAlumno, $idTipoClase, $concepto, $descripcion,$monto, $fecha)
+    {
+        $alumno = $this->em->getRepository(Alumno::class)->find($idAlumno); 
+
+        $cobro = new Cobro();
+//        $alumno->addCobro($cobro);
+        $cobro->setAlumno($alumno)->setMonto($monto);
+        $fechaCobro = isset($fecha) ? $fecha : new Date();
+        $cobro->setFecha($fechaCobro);
+        $cobro->setConcepto($concepto);
+        $cobro->setDescripcion($descripcion);
+        $cobro->setIdTipoClase($idTipoClase);
+
+        $this->em->persist($cobro);
+        $this->em->persist($alumno);
+        $this->em->flush();
+    }
 
     public function liquidarReservas()
     {
@@ -460,4 +511,15 @@ class CustomService
     {
         return $this->em->getRepository(Reserva::class)->findReservasProfesor($profesorId);
     }
+
+    public function totalMontos($collection){
+        $total = 0;
+        foreach ($collection as $item) {
+            $total += $item->getMonto();
+        }
+        return $total;
+
+    }
+
+
 }
