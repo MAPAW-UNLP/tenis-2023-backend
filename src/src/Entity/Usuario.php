@@ -5,11 +5,11 @@ namespace App\Entity;
 use App\Repository\UsuarioRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-
+use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @ORM\Entity(repositoryClass=UsuarioRepository::class)
  */
-class Usuario
+class Usuario implements UserInterface 
 {
     /**
      * @ORM\Id
@@ -54,9 +54,9 @@ class Usuario
     private $administrador;
 
     /**
-     * @ORM\Column(type="string", length=30)
+     * @ORM\Column(type="json")
      */
-    private $rol;
+    private $roles = [];
 
     public function getId(): ?int
     {
@@ -130,17 +130,35 @@ class Usuario
         $this->administrador = $administrador;
     }
 
-    public function getRol(): ?string
+    public function getRoles(): array
     {
-        return $this->rol;
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
     }
 
-    public function setRol(string $rol): self
+    public function setRoles(array $roles): self
     {
-        $this->rol = $rol;
+        $this->roles = $roles;
 
         return $this;
     }
 
+    /**
+    * @see UserInterface
+    */
+   public function getSalt(): ?string
+   {
+       return null;
+   }
+   /**
+    * @see UserInterface
+    */
+   public function eraseCredentials()
+   {
+       // If you store any temporary, sensitive data on the user, clear it here
+       // $this->plainPassword = null;
+   }
 
 }

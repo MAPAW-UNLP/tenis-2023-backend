@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\CustomService as ServiceCustomService;
-
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
     /**
      * @Route(path="/api")
@@ -32,7 +32,7 @@ class UsuarioController extends AbstractController
     public function checkLogin(
         Request $request, 
         ManagerRegistry $doctrine ,
-        ServiceCustomService $cs): Response
+        ServiceCustomService $cs, JWTTokenManagerInterface $JWTManager): Response
     {
 
         // $user = $request->request->get('user');
@@ -56,10 +56,12 @@ class UsuarioController extends AbstractController
         } else {
 
             $cs->procesamientoInicial();
+            $token = $JWTManager->create($userDB);
 
             $userDB = array(
                 "rta" => "ok",
-                "detail"=> $userDB->getId()
+                "detail"=> $userDB->getId(),
+                "token" => $token
             );
 
         }
