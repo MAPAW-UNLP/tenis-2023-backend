@@ -51,8 +51,8 @@ class PagosController extends AbstractController
                 'idTipoClase' => $pago->getIdTipoClase() ? $pago -> getIdTipoClase() : null,
                 'monto' => $pago->getMonto(), // monto
                 'fecha' => $cs->getFormattedDate($pago->getFecha()),
-                'fecha_format' => $pago->getFecha()->format('d/m/Y'),
-                'hora' => $pago->getHora()->format('H:i:s'),
+                'fecha_format' => $pago->getFecha()->format('d/m/y'),
+                'hora' => $pago->getHora()->format('H:i'),
                 'concepto_id' => $pago->getMotivo(),
                 'concepto_desc' => $concepto_desc,
                 'idProfesor' => $pago->getProfesor() ? $pago->getProfesor()->getId() : null,
