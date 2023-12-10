@@ -62,6 +62,8 @@ class CobroController extends AbstractController
             "nombreAlumno" => $cobro->getAlumno() ? $cobro->getAlumno()->getNombre() : "",
             "monto" => $cobro->getMonto(), // monto
             "fecha" => $cs->getFormattedDate($cobro->getFecha()),
+            "fecha_format" => $cobro->getFecha()->format('d/m/Y'),
+            "hora" => $cobro->getHora()->format('H:i:s'),
             "concepto_id" => $cobro->getConcepto(),
             "concepto_desc" => $concepto_desc,
             "descripcion" => $cobro->getDescripcion()
