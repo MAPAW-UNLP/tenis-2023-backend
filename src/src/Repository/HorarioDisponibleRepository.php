@@ -55,6 +55,16 @@ class HorarioDisponibleRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findHorariosDisponiblesProfesorId($profesor_id): array
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.profesor_id = :profesor_id')
+            ->setParameter('profesor_id', $profesor_id)
+            ->orderBy('h.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return HorarioDisponible[] Returns an array of HorarioDisponible objects
     //     */

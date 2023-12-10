@@ -87,4 +87,27 @@ class HorarioDisponibleController extends AbstractController
         // Devolver el número del día de la semana o 0 si no se encuentra
         return $daysOfWeek[$lowercaseDay] ?? 0;
     }
+
+    /**
+     * @Route("/horario/disponible", name="app_horario_disponible_get", methods={"GET"})
+     */
+    public function getHorarioDisponible(HorarioDisponibleRepository $horarioDisponibleRepository): Response
+    {
+        $horarioDisponible = $horarioDisponibleRepository->findHorariosDisponiblesProfesorId(1);
+        $data = [];
+
+        foreach ($horarioDisponible as $horario) {
+            $data[] = [
+                'id' => $horario->getId(),
+                'fecha' => $horario->getFecha()->format('Y-m-d'),
+                'horaIni' => $horario->getHoraIni()->format('H:i'),
+                'horaFin' => $horario->getHoraFin()->format('H:i'),
+                'profesorId' => $horario->getProfesorId(),
+            ];
+        }
+        if (!$data) {
+            return new JsonResponse(['message' => 'No se encontraron horarios disponibles'], 404);
+        }
+        return new JsonResponse($data, 200);
+    }
 }
