@@ -58,6 +58,11 @@ class Pagos
      */
     private $cantidad;
 
+    /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
+
 
     public function getId(): ?int
     {
@@ -157,6 +162,18 @@ class Pagos
     public function setCantidad(?int $cantidad): self
     {
         $this->cantidad = $cantidad;
+
+        return $this;
+    }
+
+    public function getHora(): ?\DateTimeInterface
+    {
+        return $this->hora;
+    }
+
+    public function setHora(\DateTimeInterface $hora): self
+    {
+        $this->hora = $hora;
 
         return $this;
     }

@@ -90,7 +90,7 @@ class Alumno
     }
 
     /** @Ignore() */
-    public function getCobros(): ?Collection
+    public function getCobros()
     {
         return $this->cobros;
     }

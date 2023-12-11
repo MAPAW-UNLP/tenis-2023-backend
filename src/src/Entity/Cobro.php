@@ -53,6 +53,11 @@ class Cobro
      */
     private $descripcion;
 
+    /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
+
 
     public function getId(): ?int
     {
@@ -139,6 +144,18 @@ class Cobro
     public function setDescripcion(?string $descripcion): self
     {
         $this->descripcion = $descripcion;
+
+        return $this;
+    }
+
+    public function getHora(): ?\DateTimeInterface
+    {
+        return $this->hora;
+    }
+
+    public function setHora(\DateTimeInterface $hora): self
+    {
+        $this->hora = $hora;
 
         return $this;
     }

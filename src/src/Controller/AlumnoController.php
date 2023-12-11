@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Alumno;
+use App\Entity\Cobro;
+use App\Entity\Configuracion;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +12,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\Common\Collections\ArrayCollection;
 
 
 /**
@@ -89,7 +92,7 @@ class AlumnoController extends AbstractController
 
         if ($alumnoId != null) {
             $em = $doctrine->getManager();
-            $alumno = $em->getRepository( Alumno::class )->findOneById($alumnoId);
+            $alumno = $em->getRepository( Alumno::class )->find($alumnoId);
 
             if ($alumno!=null){
                 if (isset($data->nombre)){
@@ -114,6 +117,71 @@ class AlumnoController extends AbstractController
         }
         return $this->json($resp);
     }
+
+    /**
+     * @Route("/clases_a_favor", name="app_clases_a_favor", methods={"GET"})
+    */
+    public function clasesAFavorAlumno (Request $request, ManagerRegistry $doctrine): Response {
+       
+        $alumnoId = $request->query->get('alumnoId');        
+        $em = $doctrine->getManager();
+        $alumno = $em->getRepository( Alumno::class )->find($alumnoId);
+
+        if (!$alumno) {
+            return new JsonResponse(['error' => 'Alumno no encontrado'], 404);
+        }
+
+
+        $query = $em->createQueryBuilder();
+        $query 
+        ->select('c')
+        ->from(Cobro::class, 'c')
+        ->where('c.alumno = :alumnoId')
+        ->andWhere('c.idTipoClase = :tipoClaseValor')
+        ->setParameter('alumnoId', strval($alumnoId))
+        ->setParameter('tipoClaseValor', 1) // individual
+        ->orderBy('c.fecha', 'DESC');
+
+        $query2 = $em->createQueryBuilder();
+        $query2 
+        ->select('c')
+        ->from(Cobro::class, 'c')
+        ->where('c.alumno = :alumnoId')
+        ->andWhere('c.idTipoClase = :tipoClaseValor')
+        ->setParameter('alumnoId', strval($alumnoId))
+        ->setParameter('tipoClaseValor', 2) // grupal
+        ->orderBy('c.fecha', 'DESC');
+
+        $cobrosAlumnoT1 = $query->getQuery()->getResult();
+        $cobrosAlumnoT2 = $query2->getQuery()->getResult();
+
+        $tipoClaseUno = $this->getDoctrine()->getRepository(Configuracion::class)->findOneBy(['$nombreTipo' => 'individual']); // individual
+        $precioTipoClaseUno = $tipoClaseUno->getPrecio();
+        $tipoClaseDos = $this->getDoctrine()->getRepository(Configuracion::class)->find(['$nombreTipo' => 'grupal']); // grupal
+        $precioTipoClaseDos = $tipoClaseDos->getPrecio();
+
+        //Se calcula el número de clases pagadas dividiendo el total pagado entre el precio por cada tipo de clase.
+        // Si $clasesTUno/$clasesTUno es positivo significa que tiene clases a favor; si es negativo, significa que debe clases.
+        $clasesTUno = 0;
+        $clasesTDos = 0;
+        if($tipoClaseUno){
+            $clasesTUno = ((count($cobrosAlumnoT1) * $precioTipoClaseUno) / $precioTipoClaseUno) - count($cobrosAlumnoT1);      
+        }
+        if($tipoClaseDos){
+            $clasesTDos = ((count($cobrosAlumnoT2) * $precioTipoClaseDos) / $precioTipoClaseDos) - count($cobrosAlumnoT2);
+        }
+
+        $resp = [
+            'nombre_alumno' => $alumno->getNombre(),
+            'clases_Tipo1' => $clasesTUno,
+            'clases_Tipo2' => $clasesTDos,
+        ];
+
+        return new JsonResponse($resp);
+
+
+    }
+
 
 
 

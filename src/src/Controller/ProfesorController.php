@@ -82,6 +82,7 @@ class ProfesorController extends AbstractController
         $usuario->setProfesor($profesor); // Idem
         $usuario->setRoles(['ROLE_PROFESOR']); // seteo el nombre del rol, para poder acceder a las rutas
         $profesor->setUsuario($usuario);
+        $profesor->setPrecioPorHora(1000); // valor por defecto
         // $this->correoService->enviarCorreoCreacionProfesor($email, $nombre, $password);
 
         $em = $doctrine->getManager();
@@ -118,7 +119,7 @@ class ProfesorController extends AbstractController
 
         if ($profesorId != null) {
             $em = $doctrine->getManager();
-            $profesor = $em->getRepository( Profesor::class )->findOneById($profesorId);
+            $profesor = $em->getRepository( Profesor::class )->find($profesorId);
 
             if ($profesor!=null){
                 if (isset($data->nombre)){
@@ -129,6 +130,9 @@ class ProfesorController extends AbstractController
                 }
                 if (isset($data->email)){
                     $profesor->setEmail($data->email);
+                }
+                if(isset($data->precioPorHora)){
+                    $profesor->setPrecioPorHora($data->precioPorHora);
                 }
 
                 $em->persist($profesor);

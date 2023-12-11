@@ -48,6 +48,11 @@ class Profesor
     */
     private $pagos;
 
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $precioPorHora;
+
     public function __construct()
     {
         $this->pagos = new ArrayCollection();
@@ -120,6 +125,18 @@ class Profesor
             $this->pagos[] = $pago;
             // $pago->setProfesor($this);
         }
+
+        return $this;
+    }
+
+    public function getPrecioPorHora(): ?float
+    {
+        return $this->precioPorHora;
+    }
+
+    public function setPrecioPorHora(?float $precioPorHora): self
+    {
+        $this->precioPorHora = $precioPorHora;
 
         return $this;
     }

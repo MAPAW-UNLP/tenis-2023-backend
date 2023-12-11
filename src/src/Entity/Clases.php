@@ -27,6 +27,12 @@ class Clases
      */
     private $importe;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Configuracion::class, inversedBy="clases")
+     * @ORM\JoinColumn(name="tipo_clase_nom", referencedColumnName="nombre_tipo", nullable=true)
+     */
+    private $tipoClase;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +58,18 @@ class Clases
     public function setImporte(int $importe): self
     {
         $this->importe = $importe;
+
+        return $this;
+    }
+
+    public function getTipoClase(): ?TipoClase
+    {
+        return $this->tipoClase;
+    }
+
+    public function setTipoClase(?TipoClase $tipoClase): self
+    {
+        $this->tipoClase = $tipoClase;
 
         return $this;
     }

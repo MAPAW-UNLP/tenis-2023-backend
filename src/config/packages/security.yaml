@@ -50,13 +50,13 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/usuario, roles: PUBLIC_ACCESS }
-        # - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/profesoress, roles: ROLE_ADMINISTRADOR }
-        - { path: ^/api/profesorr, roles: ROLE_ADMINISTRADOR }
-        - { path: ^/api/usuarios, roles: ROLE_ADMINISTRADOR }
-        - { path: ^/api/alumnos, roles: ROLE_ADMINISTRADOR }
-        - { path: ^/api/alumno, roles: ROLE_ADMINISTRADOR }
+        # - { path: ^/api/usuario, roles: PUBLIC_ACCESS }
+        # # - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        # - { path: ^/api/profesoress, roles: ROLE_ADMINISTRADOR }
+        # - { path: ^/api/profesorr, roles: ROLE_ADMINISTRADOR }
+        # - { path: ^/api/usuarios, roles: ROLE_ADMINISTRADOR }
+        # - { path: ^/api/alumnos, roles: ROLE_ADMINISTRADOR }
+        # - { path: ^/api/alumno, roles: ROLE_ADMINISTRADOR }
 
 
 when@test:
