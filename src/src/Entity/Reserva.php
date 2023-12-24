@@ -59,6 +59,11 @@ class Reserva
      */
     private $idTipoClase;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $pago_id;
+
     public function __construct($fecha, $hora_ini, $hora_fin, $persona_id, $cancha_id, $idTipoClase, $replica, $estado_id)
     {
         $this->setFecha($fecha);
@@ -69,6 +74,7 @@ class Reserva
         $this->setIdTipoClase($idTipoClase);
         $this->setReplica($replica);
         $this->setEstadoId($estado_id);
+        $this->setPagoId(null);
     }
 
     public function getId(): ?int
@@ -168,6 +174,18 @@ class Reserva
     public function setIdTipoClase(?int $idTipoClase): self
     {
         $this->idTipoClase = $idTipoClase;
+
+        return $this;
+    }
+
+    public function getPagoId(): ?int
+    {
+        return $this->pago_id;
+    }
+
+    public function setPagoId(?int $pago_id): self
+    {
+        $this->pago_id = $pago_id;
 
         return $this;
     }

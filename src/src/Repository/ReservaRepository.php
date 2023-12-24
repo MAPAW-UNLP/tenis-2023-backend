@@ -184,6 +184,34 @@ class ReservaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findReservasProfesorSinPagoId($persona_id, $primerDia, $ultimoDia): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.persona_id = :personaId')
+            ->andWhere('u.fecha >= :primerDia')
+            ->andWhere('u.fecha <= :ultimoDia')
+            ->setParameter('personaId', $persona_id)
+            ->setParameter('primerDia', $primerDia)
+            ->setParameter('ultimoDia', $ultimoDia)
+            ->andWhere('u.pago_id is null')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findReservasProfesorConPagoId($persona_id, $primerDia, $ultimoDia): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.persona_id = :personaId')
+            ->andWhere('u.fecha >= :primerDia')
+            ->andWhere('u.fecha <= :ultimoDia')
+            ->setParameter('personaId', $persona_id)
+            ->setParameter('primerDia', $primerDia)
+            ->setParameter('ultimoDia', $ultimoDia)
+            ->andWhere('u.pago_id is not null')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     /* public function changeEstadoReserva($id, $estado_id): void
     {
