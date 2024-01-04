@@ -38,6 +38,11 @@ class Pagos
     private $fecha;
 
     /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
     private $motivo;
@@ -110,6 +115,22 @@ class Pagos
         $this->fecha = $fecha;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHora()
+    {
+        return $this->hora;
+    }
+
+    /**
+     * @param mixed $hora
+     */
+    public function setHora($hora): void
+    {
+        $this->hora = $hora;
     }
 
     public function getMotivo(): ?string

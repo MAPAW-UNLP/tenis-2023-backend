@@ -38,6 +38,11 @@ class Cobro
     private $fecha;
 
     /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
     private $concepto;
@@ -105,6 +110,22 @@ class Cobro
         $this->fecha = $fecha;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHora()
+    {
+        return $this->hora;
+    }
+
+    /**
+     * @param mixed $hora
+     */
+    public function setHora($hora): void
+    {
+        $this->hora = $hora;
     }
 
     public function getConcepto(): ?string

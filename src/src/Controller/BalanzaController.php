@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\CustomService as ServiceCustomService;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -205,6 +206,8 @@ class BalanzaController extends AbstractController
                 $dataCobros[] = [
                     'id' => $cobro->getId(),
                     'fecha' => $cs->getFormattedDate($cobro->getFecha()),
+                    'fecha_format' => $cobro->getFecha()->format('d/m/y'),
+                    "hora" => $cobro->getHora()->format('H:i'),
                     'concepto' => $cobro->getConcepto(),
                     'concepto_desc' => intval($cobro->getConcepto()) === 1 ? 'Alumno' :
                         (intval($cobro->getConcepto()) === 2 ? 'Alquiler' : 'Varios'),
@@ -222,6 +225,8 @@ class BalanzaController extends AbstractController
                 $dataPagos[] = [
                     'id' => $pagos->getId(),
                     'fecha' => $cs->getFormattedDate($pagos->getFecha()),
+                    'fecha_format' => $pagos->getFecha()->format('d/m/y'),
+                    "hora" => $pagos->getHora()->format('H:i'),
                     'concepto' => $pagos->getMotivo(),
                     'concepto_desc' => intval($pagos->getMotivo()) === 1 ? 'Profesor' :
                         (intval($pagos->getMotivo()) === 2 ? 'Proveedor' : 'Varios'),
@@ -240,9 +245,22 @@ class BalanzaController extends AbstractController
         $merged = new ArrayCollection(
             array_merge($dataCobros, $dataPagos)
         );
+
         $iterator = $merged->getIterator();
-        $iterator->uasort(function($a, $b){
-            return ($a['fecha'] > $b['fecha']) ? -1 : 1;
+        $iterator->uasort(function ($a, $b) {
+            $fechaA = $a['fecha'];
+            $fechaB = $b['fecha'];
+
+            // Primero, ordenar por fecha
+            if ($fechaA != $fechaB) {
+                return ($fechaA > $fechaB) ? -1 : 1;
+            }
+
+            // Si las fechas son iguales, ordenar por hora
+            $horaA = $a['hora'];
+            $horaB = $b['hora'];
+
+            return ($horaA > $horaB) ? -1 : 1;
         });
 
         $merged_result = iterator_to_array($iterator, false);

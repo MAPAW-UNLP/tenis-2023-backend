@@ -19,6 +19,7 @@ use App\Entity\Profesor;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Validator\Constraints\Time;
 
 class CustomService
 {
@@ -329,6 +330,7 @@ class CustomService
         $pago -> setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
+        $pago->setHora(new DateTime());
 
         $this->em->persist($pago);
         $this->em->flush();
@@ -346,6 +348,8 @@ class CustomService
         $pago->setDescripcion($descripcion);
         $fechaPago = isset($fecha) ? $fecha : new Date();
         $pago->setFecha($fechaPago);
+        $pago->setHora(new DateTime());
+
         $this->em->persist($pago);
         $this->em->persist($profesor);
         $this->em->flush();
@@ -358,6 +362,8 @@ class CustomService
         $cobro->setMonto($monto)->setConcepto($concepto)->setDescripcion($descripcion);
         $fechaCobro = isset($fecha) ? $fecha : new Date();
         $cobro->setFecha($fechaCobro);
+        $cobro->setHora(new DateTime());
+
         $this->em->persist($cobro);
         $this->em->flush();
     }
@@ -374,6 +380,7 @@ class CustomService
         $cobro->setConcepto($concepto);
         $cobro->setDescripcion($descripcion);
         $cobro->setIdTipoClase($idTipoClase);
+        $cobro->setHora(new DateTime());
 
         $this->em->persist($cobro);
         $this->em->persist($alumno);
